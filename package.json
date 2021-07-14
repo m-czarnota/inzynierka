@@ -20,6 +20,9 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "@popperjs/core": "^2.9.2",
+        "bootstrap": "^5.0.2",
+        "jquery": "^3.6.0",
         "prettier-webpack-plugin": "^1.2.0",
         "vue": "^3.1.4"
     }
