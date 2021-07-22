@@ -36,7 +36,7 @@ class Game
     /**
      * @ORM\Column(type="json")
      */
-    private $players = [];
+    private $users = [];
 
     public function getId(): ?int
     {
@@ -79,14 +79,14 @@ class Game
         return $this;
     }
 
-    public function getPlayers(): ?array
+    public function getUsers(): ?array
     {
-        return $this->players;
+        return $this->users;
     }
 
-    public function setPlayers(array $players): self
+    public function setUsers(array $users): self
     {
-        $this->players = $players;
+        $this->users = $users;
 
         return $this;
     }

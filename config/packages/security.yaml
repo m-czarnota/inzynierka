@@ -2,7 +2,7 @@ security:
     # https://symfony.com/doc/current/security/experimental_authenticators.html
     enable_authenticator_manager: true
     password_hashers:
-        App\Entity\Player:
+        App\Entity\User:
             algorithm: auto
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
@@ -10,7 +10,7 @@ security:
         users_in_memory: { memory: null }
         app_user_provider:
             entity:
-                class: App\Entity\Player
+                class: App\Entity\User
                 property: email
         # used to reload user from session & other features (e.g. switch_user)
     firewalls:

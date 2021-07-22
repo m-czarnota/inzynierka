@@ -2,16 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\PlayerRepository;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity(repositoryClass=PlayerRepository::class)
+ * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  */
-class Player implements UserInterface
+class User implements UserInterface
 {
     /**
      * @ORM\Id
@@ -29,37 +31,37 @@ class Player implements UserInterface
      * @var string The hashed password
      * @ORM\Column(type="string")
      */
-    private $password;
+    private string $password;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      */
-    private $nick;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isBlocked;
+    private ?string $nick;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $isBanned;
+    private bool $isBlocked = false;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Player::class)
+     * @ORM\Column(type="boolean")
      */
-    private $friends;
+    private bool $isBanned = false;
 
     /**
-     * @ORM\OneToOne(targetEntity=Score::class, mappedBy="player", cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=User::class)
      */
-    private $score;
+    private ArrayCollection $friends;
 
     /**
-     * @ORM\OneToMany(targetEntity=WinnedCombination::class, mappedBy="player", orphanRemoval=true)
+     * @ORM\OneToOne(targetEntity=Score::class, mappedBy="user", cascade={"persist", "remove"})
      */
-    private $winnedCombinations;
+    private ?Score $score;
+
+    /**
+     * @ORM\OneToMany(targetEntity=WinnedCombination::class, mappedBy="user", orphanRemoval=true)
+     */
+    private ArrayCollection $winnedCombinations;
 
     /**
      * @ORM\ManyToOne(targetEntity=GameRoom::class)
@@ -69,23 +71,30 @@ class Player implements UserInterface
     /**
      * @ORM\ManyToOne(targetEntity=Game::class)
      */
-    private $game;
+    private ?Game $game;
 
     /**
-     * @ORM\OneToMany(targetEntity=MatchHistory::class, mappedBy="playerWin", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=MatchHistory::class, mappedBy="userWin", orphanRemoval=true)
      */
-    private $matchHistories;
+    private ArrayCollection $matchHistories;
 
     /**
      * @ORM\Column(type="json")
      */
-    private $roles = [];
+    private array $roles = [];
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private bool $isVerified = false;
 
     public function __construct()
     {
         $this->friends = new ArrayCollection();
         $this->winnedCombinations = new ArrayCollection();
         $this->matchHistories = new ArrayCollection();
+        $this->gameRoom = null;
+        $this->game = null;
     }
 
     public function getId(): ?int
@@ -212,12 +221,12 @@ class Player implements UserInterface
     {
         // unset the owning side of the relation if necessary
         if ($score === null && $this->score !== null) {
-            $this->score->setPlayer(null);
+            $this->score->setUser(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($score !== null && $score->getPlayer() !== $this) {
-            $score->setPlayer($this);
+        if ($score !== null && $score->getUser() !== $this) {
+            $score->setUser($this);
         }
 
         $this->score = $score;
@@ -237,7 +246,7 @@ class Player implements UserInterface
     {
         if (!$this->winnedCombinations->contains($winnedCombination)) {
             $this->winnedCombinations[] = $winnedCombination;
-            $winnedCombination->setPlayer($this);
+            $winnedCombination->setUser($this);
         }
 
         return $this;
@@ -247,8 +256,8 @@ class Player implements UserInterface
     {
         if ($this->winnedCombinations->removeElement($winnedCombination)) {
             // set the owning side to null (unless already changed)
-            if ($winnedCombination->getPlayer() === $this) {
-                $winnedCombination->setPlayer(null);
+            if ($winnedCombination->getUser() === $this) {
+                $winnedCombination->setUser(null);
             }
         }
 
@@ -291,7 +300,7 @@ class Player implements UserInterface
     {
         if (!$this->matchHistories->contains($matchHistory)) {
             $this->matchHistories[] = $matchHistory;
-            $matchHistory->setPlayerWin($this);
+            $matchHistory->setUserWin($this);
         }
 
         return $this;
@@ -301,8 +310,8 @@ class Player implements UserInterface
     {
         if ($this->matchHistories->removeElement($matchHistory)) {
             // set the owning side to null (unless already changed)
-            if ($matchHistory->getPlayerWin() === $this) {
-                $matchHistory->setPlayerWin(null);
+            if ($matchHistory->getUserWin() === $this) {
+                $matchHistory->setUserWin(null);
             }
         }
 
@@ -346,5 +355,17 @@ class Player implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
     }
 }

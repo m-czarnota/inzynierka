@@ -18,10 +18,10 @@ class WinnedCombination
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Player::class, inversedBy="winnedCombinations")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="winnedCombinations")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $player;
+    private ?User $user;
 
     /**
      * @ORM\Column(type="json")
@@ -33,14 +33,14 @@ class WinnedCombination
         return $this->id;
     }
 
-    public function getPlayer(): ?Player
+    public function getUser(): ?User
     {
-        return $this->player;
+        return $this->user;
     }
 
-    public function setPlayer(?Player $player): self
+    public function setUser(?User $user): self
     {
-        $this->player = $player;
+        $this->user = $user;
 
         return $this;
     }

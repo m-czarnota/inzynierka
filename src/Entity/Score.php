@@ -18,43 +18,48 @@ class Score
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=Player::class, inversedBy="score", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=User::class, inversedBy="score", cascade={"persist", "remove"})
      */
-    private $player;
+    private ?User $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=Season::class, inversedBy="scores")
      */
-    private $season;
+    private ?Season $season;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $ranks;
+    private float $ranks = 0.0;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $withComputer;
+    private float $withComputer = 0.0;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $withFriend;
+    private float $withFriend = 0.0;
+
+    public function __construct()
+    {
+        $this->season = null;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getPlayer(): ?Player
+    public function getUser(): ?User
     {
-        return $this->player;
+        return $this->user;
     }
 
-    public function setPlayer(?Player $player): self
+    public function setUser(?User $user): self
     {
-        $this->player = $player;
+        $this->user = $user;
 
         return $this;
     }

@@ -18,16 +18,16 @@ class MatchHistory
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Player::class, inversedBy="matchHistories")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="matchHistories")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $playerWin;
+    private ?User $userWin;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Player::class, inversedBy="matchHistories")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="matchHistories")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $playerLose;
+    private ?User $userLose;
 
     /**
      * @ORM\Column(type="datetime")
@@ -59,26 +59,26 @@ class MatchHistory
         return $this->id;
     }
 
-    public function getPlayerWin(): ?Player
+    public function getUserWin(): ?User
     {
-        return $this->playerWin;
+        return $this->userWin;
     }
 
-    public function setPlayerWin(?Player $playerWin): self
+    public function setUserWin(?User $userWin): self
     {
-        $this->playerWin = $playerWin;
+        $this->userWin = $userWin;
 
         return $this;
     }
 
-    public function getPlayerLose(): ?Player
+    public function getUserLose(): ?User
     {
-        return $this->playerLose;
+        return $this->userLose;
     }
 
-    public function setPlayerLose(?Player $playerLose): self
+    public function setUserLose(?User $userLose): self
     {
-        $this->playerLose = $playerLose;
+        $this->userLose = $userLose;
 
         return $this;
     }
