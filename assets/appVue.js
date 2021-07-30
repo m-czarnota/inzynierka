@@ -1,5 +1,6 @@
-import { createApp } from "vue";
-import Board from "./controllers/Board";
+require('./controllers/GameState');
+
+import {createApp} from "vue";
 import ArrangeShips from "./controllers/ArrangeShips";
 
 const app = createApp(ArrangeShips);

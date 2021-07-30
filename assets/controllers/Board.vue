@@ -8,24 +8,18 @@
 
 <script>
 import Field from "./Field";
+
 export default {
     name: "Board",
     components: {Field},
     data() {
         return {
             size: 10,
-            fields: [],
         };
-    },
-    methods: {
-
     },
     created() {
         console.log('stworzono');
     },
-    mounted() {
-        console.log('dupa');
-    }
 }
 </script>
 
