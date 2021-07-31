@@ -10,6 +10,7 @@ class GameState {
             {1: 4},
         ];
         this.shipsToDragging = [];
+        this.boardArrangeFields = [];
 
         this.prepareShips();
     }
@@ -23,7 +24,6 @@ class GameState {
                 this.shipsToDragging.push(ship);
             }
         });
-        console.log(this.shipsToDragging);
     }
 }
 

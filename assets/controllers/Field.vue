@@ -1,15 +1,10 @@
 <template>
     <div class="board-cell" ref="board-cell"
          @click.once="shot"
-         @drop="onDrop($event)"
-         @dragenter="onDragEnter($event)"
-         @dragleave="onDragLeave($event)"
-         @dragover.prevent></div>
+    ></div>
 </template>
 
 <script>
-import {gameState} from "./GameState";
-
 let id = 0
 
 export default {
@@ -24,22 +19,6 @@ export default {
     },
     props: ['coordinatesProp'],
     methods: {
-        onDrop(event) {
-            console.log('jestem drop', event, 'to mój target:', event.target);
-            let shipId = parseInt(event.dataTransfer.getData('ship'));
-            let ship = gameState.shipsToDragging.find(shipToFind => shipToFind.id === shipId);
-            // gameState.shipsToDragging.splice(gameState.shipsToDragging.indexOf(ship), 1);
-
-            // allocate ships elements in suitable places
-        },
-        onDragEnter(event) {
-            event.target.style.backgroundColor = '#efefef';
-            console.log('robie drag enter');
-        },
-        onDragLeave(event) {
-            event.target.style.backgroundColor = "";
-            console.log('robie drag leave');
-        },
         shot(event) {
             console.log('shot on', this.coordinates);
             this.isHit = true;

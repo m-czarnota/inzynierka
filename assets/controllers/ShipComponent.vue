@@ -1,17 +1,22 @@
 <template>
-    <div class="board-ship" draggable="true" @dragstart="onDragStart($event)">
-        <div v-for="n in ship.elementsCount" class="board-cell board-ship-element" ref="x"></div>
+    <div class="board-ship" ref="x">
+        <field :coordinates-prop="'A1'" v-for="n in ship.elementsCount" class="board-ship-element"
+               :data-element-number="n" draggable="true"
+               @dragstart="onDragStart($event)"></field>
     </div>
     <button @click="ship.rotate($event)" v-if="ship.elementsCount > 1">Rotate</button>
 </template>
 
 <script>
+import Field from "./Field";
+
 const $ = require('jquery');
 
 let id = 0;
 
 export default {
     name: "ShipComponent",
+    components: {Field},
     data() {
         return {
             id: id++,
@@ -21,10 +26,22 @@ export default {
     methods: {
         onDragStart(event) {
             event.dataTransfer.setData('ship', this.ship.id);
+            event.dataTransfer.setData('shipSelectedElement', event.target.getAttribute('data-element-number'));
+
+            let elements = [];
+            event.target.parentNode.querySelectorAll('.board-ship-element').forEach(div => {
+                elements.push({
+                    column: div.style.gridColumnStart,
+                    row: div.style.gridRowStart,
+                });
+            });
+
+            console.log(JSON.stringify(elements));
+            event.dataTransfer.setData('shipElements', JSON.stringify(elements));
         }
     },
     mounted() {
-        let ship = this.$refs.x.parentNode;
+        let ship = this.$refs.x;
         let shipElementSize = ship.querySelector('.board-cell').offsetWidth;
         let gridSize = shipElementSize + 10;
 
