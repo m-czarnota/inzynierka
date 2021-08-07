@@ -6,7 +6,9 @@ export class Ship {
     constructor() {
         this.id = id++;
         this.elementsCount = 0;
-        this.elements = [];
+        this.elementsGridProperties = [];
+        this.boardFields = [];
+        this.aroundFields = [];
         this.hitElements = [];
         this.poses = [];
         this.actualPose = 0;
