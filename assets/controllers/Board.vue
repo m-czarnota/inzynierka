@@ -38,7 +38,6 @@ export default {
     },
     methods: {
         onDrop(event) {
-            console.log('jestem drop', event, 'to mój target:', event.target);
             if (!this.canPlaceShipOnBoardField(event.target)) {
                 this.setAppropriateColorForAllFields();
                 return;
@@ -100,46 +99,38 @@ export default {
             });
         },
         onDragEnter(event) {
-            // TODO check canPlaceShipOnBoardField
-            console.log('robie drag enter');
-            this.changeColorFieldForDraggedShip();
+            // TODO change cursor on blocked when is cannot place the ship
+            this.changeColorFieldForDraggedShip(event);
         },
         onDragLeave(event) {
-            // TODO check canPlaceShipOnBoardField
-            console.log('robie drag leave');
-            this.changeColorFieldForDraggedShip(false);
+            this.changeColorFieldForDraggedShip(event, false);
         },
         setAppropriateColorForAllFields() {
-            for (let i = 0; i < gameState.boardArrangeFields.length; i++) {
-                for (let j = 0; j < gameState.boardArrangeFields[i].length; j++) {
-                    let field = gameState.boardArrangeFields[i][j];
-
-                    if (field.shipPointer) {
-                        field.htmlElement.style.backgroundColor = 'red';
-                    } else if (field.isNextToShipPointers.length) {
-                        field.htmlElement.style.backgroundColor = 'grey';
-                    } else {
-                        field.htmlElement.style.backgroundColor = 'hsl(140, 25%, 68%)';
-                    }
+            // TODO better colors
+            for (let field of gameState.boardArrangeFields.flat()) {
+                if (field.shipPointer) {
+                    field.htmlElement.style.backgroundColor = 'red';
+                } else if (field.isNextToShipPointers.length) {
+                    field.htmlElement.style.backgroundColor = 'grey';
+                } else {
+                    field.htmlElement.style.backgroundColor = 'hsl(140, 25%, 68%)';
                 }
             }
         },
         canPlaceShipOnBoardField(htmlElement) {
-            for (let i = 0; i < gameState.boardArrangeFields.length; i++) {
-                for (let j = 0; j < gameState.boardArrangeFields[i].length; j++) {
-                    let field = gameState.boardArrangeFields[i][j];
-                    if (htmlElement == field.htmlElement) {
-                        let movingFieldsToAction = this.getCoordinatesToAroundFields(i, j);
+            for (let [index, field] of gameState.boardArrangeFields.flat().entries()) {
+                if (htmlElement === field.htmlElement) {
+                    let fieldPosition = gameState.calculateFieldPositionFromIndex(index);
+                    let coordinatesToAroundFields = this.getCoordinatesToAroundFields(fieldPosition.row, fieldPosition.column);
 
-                        for (let k = 0; k < movingFieldsToAction.length; k++) {
-                            if (!gameState.checkIfCoordinatesAreInBoardBoundary(movingFieldsToAction[k].row, movingFieldsToAction[k].column)) {
-                                continue;
-                            }
+                    for (let coordinatesToAroundField of coordinatesToAroundFields) {
+                        if (!gameState.checkIfCoordinatesAreInBoardBoundary(coordinatesToAroundField.row, coordinatesToAroundField.column)) {
+                            continue;
+                        }
 
-                            field = gameState.boardArrangeFields[movingFieldsToAction[k].row][movingFieldsToAction[k].column];
-                            if (!field.isActive) {
-                                return false;
-                            }
+                        field = gameState.boardArrangeFields[coordinatesToAroundField.row][coordinatesToAroundField.column];
+                        if (!field.isActive) {
+                            return false;
                         }
                     }
                 }
@@ -159,14 +150,13 @@ export default {
                 {row: row + 1, column: column + 1},
             ]
         },
-        changeColorFieldForDraggedShip(addColor = true, color = 'blue') {
+        changeColorFieldForDraggedShip(event, addColor = true, color = 'blue') {
             let shipMovingProperty = this.targetsInBoardBoundary(event);
             if (shipMovingProperty) {
                 shipMovingProperty.shipElements.forEach((shipElement) => {
                     let row = shipMovingProperty.targetCoordinates.row - (shipMovingProperty.shipSelectedElement.row - shipElement.row);
                     let column = shipMovingProperty.targetCoordinates.column - (shipMovingProperty.shipSelectedElement.column - shipElement.column);
 
-                    // TODO move isActive condition to separate method
                     if (gameState.boardArrangeFields[row][column].isActive) {
                         gameState.boardArrangeFields[row][column].htmlElement.style.backgroundColor = addColor ? color : '';
                     }
@@ -175,26 +165,21 @@ export default {
         },
         targetsInBoardBoundary(event) {
             let shipElements = JSON.parse(event.dataTransfer.getData('shipElements'));
-            let shipSelectedElement = shipElements[parseInt(event.dataTransfer.getData('shipSelectedElement')) - 1];
+            let numberOfShipSelectedElement = parseInt(event.dataTransfer.getData('shipSelectedElement'));
+            let shipSelectedElement = shipElements[numberOfShipSelectedElement - 1];
 
             let targetCoordinates = (() => {
-                for (let i = 0; i < gameState.boardArrangeFields.length; i++) {
-                    for (let j = 0; j < gameState.boardArrangeFields[i].length; j++) {
-                        if (event.target === gameState.boardArrangeFields[i][j].htmlElement) {
-                            return {row: i, column: j};
-                        }
+                for (let [index, field] of gameState.boardArrangeFields.flat().entries()) {
+                    if (event.target === field.htmlElement) {
+                        return gameState.calculateFieldPositionFromIndex(index);
                     }
                 }
             })();
 
-            for (let i = 0; i < shipElements.length; i++) {
-                let shipElement = shipElements[i];
-                if (shipElement === shipSelectedElement) {
-                    continue;
-                }
+            for (let shipElementGridValues of shipElements) {
+                let checkedRow = targetCoordinates.row - (shipSelectedElement.row - shipElementGridValues.row);
+                let checkedColumn = targetCoordinates.column - (shipSelectedElement.column - shipElementGridValues.column);
 
-                let checkedRow = targetCoordinates.row - (shipSelectedElement.row - shipElement.row);
-                let checkedColumn = targetCoordinates.column - (shipSelectedElement.column - shipElement.column);
                 if (!gameState.checkIfCoordinatesAreInBoardBoundary(checkedRow, checkedColumn)) {
                     return null;
                 }
