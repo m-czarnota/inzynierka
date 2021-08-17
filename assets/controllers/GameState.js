@@ -45,6 +45,20 @@ class GameState {
             column: index % this.boardArrangeFields.length
         }
     }
+
+    calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement) {
+        return {
+            row: shipMovingProperty.targetCoordinates.row - (shipMovingProperty.shipSelectedElement.row - shipElement.row),
+            column: shipMovingProperty.targetCoordinates.column - (shipMovingProperty.shipSelectedElement.column - shipElement.column)
+        }
+    }
+
+    getFieldForShipElement(shipMovingProperty, shipElement) {
+        let coordinates = this.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
+
+        return this.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column) ?
+            this.boardArrangeFields[coordinates.row][coordinates.column] : null;
+    }
 }
 
 export const gameState = new GameState();

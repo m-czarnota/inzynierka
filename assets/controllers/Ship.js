@@ -12,6 +12,8 @@ export class Ship {
         this.hitElements = [];
         this.poses = [];
         this.actualPose = 0;
+
+        this.timerToRestoreShipOnLastPosition = null;
     }
 
     rotate(event) {
