@@ -14,12 +14,19 @@ export class Ship {
         this.actualPose = 0;
 
         this.timerToRestoreShipOnLastPosition = null;
+        this.timeToRestoreShipOnLastPosition = 1000;
     }
 
     rotate(event) {
         let target = event instanceof HTMLElement ? event : event.target;
+        this.elementsGridProperties = [];
+
         $(target).prev().children().each((index, element) => {
             $(element).css(this.poses[this.actualPose][index]);
+            this.elementsGridProperties.push({
+                column: $(element).css('gridColumnStart'),
+                row: $(element).css('gridRowStart'),
+            });
         });
         this.actualPose++;
 

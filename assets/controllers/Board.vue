@@ -21,6 +21,7 @@ export default {
     data() {
         return {
             size: 10,
+            ships: [],
         };
     },
     mounted() {
@@ -44,10 +45,14 @@ export default {
             }
 
             let shipId = parseInt(event.dataTransfer.getData('ship'));
-            let ship = gameState.shipsToDragging.find(shipToFind => shipToFind.id === shipId);
+            let ship = gameState.shipsToDragging.find(shipToFind => shipToFind && shipToFind.id === shipId);
 
-            // TODO remove this ship from ships able to dragging after good drag
-            gameState.shipsToDragging.splice(gameState.shipsToDragging.indexOf(ship), 1);
+            if (!ship) {
+                ship = this.ships.find(shipToFind => shipToFind.id === shipId);
+            } else {
+                this.ships.push(ship);
+                gameState.shipsToDragging[gameState.shipsToDragging.indexOf(ship)] = null;
+            }
 
             // allocate ships elements in suitable places
             let shipMovingProperty = this.targetsInBoardBoundary(event);
@@ -77,7 +82,6 @@ export default {
                 shipField.numberOfShipElement = index + 1;
                 shipField.htmlElement.style.backgroundColor = 'red';
                 ship.boardFields.push(shipField);
-                console.log(ship.boardFields);
 
                 // block around fields
                 let coordinatesToAroundFields = this.getCoordinatesToAroundFields(coordinatesShip.row, coordinatesShip.column);
@@ -93,7 +97,7 @@ export default {
                         ship.aroundFields.push(fieldAroundShip);
                     }
 
-                    // TODO allow drag placed ship from his place out of board
+                    // TODO allow drag placed ship from his place out of board (delete this ship from this.ships)
                 });
             });
 
@@ -102,13 +106,15 @@ export default {
                 field.htmlElement.setAttribute('draggable', 'true');
                 field.htmlElement.ondrag = () => {
                     clearTimeout(ship.timerToRestoreShipOnLastPosition);
+
                     ship.timerToRestoreShipOnLastPosition = setTimeout(() => {
                         Object.defineProperty(event, 'target', {
                             value: ship.boardFields[parseInt(event.dataTransfer.getData('shipSelectedElement')) - 1].htmlElement
                         });
                         this.onDrop(event);
-                    }, 1000);
+                    }, ship.timeToRestoreShipOnLastPosition);
                 };
+
                 field.htmlElement.ondragstart = (event) => {
                     event.dataTransfer.setData('ship', ship.id);
                     event.dataTransfer.setData('shipSelectedElement', field.numberOfShipElement);
@@ -120,6 +126,9 @@ export default {
                     ship.aroundFields = [];
                 };
             });
+
+            // update scope and other components
+            this.$parent.$forceUpdate();
         },
         onDragEnter(event) {
             // TODO change cursor on blocked when is cannot place the ship
