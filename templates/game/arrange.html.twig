@@ -2,8 +2,13 @@
 
 {% block javascripts %}
     {{ parent() }}
+    {{ encore_entry_script_tags('appVue') }}
 {% endblock %}
 
 {% block body %}
-    <div id="app">Hello</div>
+    <div id="app">
+        <ship-component v-if="gameState.shipsToDragging[9] !== null"
+                        :ship="gameState.shipsToDragging[9]"></ship-component>
+        <board></board>
+    </div>
 {% endblock %}

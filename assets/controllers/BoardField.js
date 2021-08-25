@@ -1,6 +1,8 @@
 let id = 0;
 
 export class BoardField {
+    static gridSize = null;
+
     constructor() {
         this.id = id++;
         this.shipPointer = null;  // in which ship does this element belong

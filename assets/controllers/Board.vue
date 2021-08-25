@@ -13,6 +13,7 @@
 <script>
 import FieldComponent from "./FieldComponent";
 import {gameState} from "./GameState";
+import {dragAndDropHelper} from "./DragAndDropHelper";
 import {BoardField} from "./BoardField";
 
 export default {
@@ -53,6 +54,8 @@ export default {
                 this.ships.push(ship);
                 gameState.shipsToDragging[gameState.shipsToDragging.indexOf(ship)] = null;
             }
+
+            dragAndDropHelper.removeShipHtml(ship);
 
             // allocate ships elements in suitable places
             let shipMovingProperty = this.targetsInBoardBoundary(event);
@@ -114,17 +117,11 @@ export default {
                         this.onDrop(event);
                     }, ship.timeToRestoreShipOnLastPosition);
                 };
-
-                field.htmlElement.ondragstart = (event) => {
-                    event.dataTransfer.setData('ship', ship.id);
-                    event.dataTransfer.setData('shipSelectedElement', field.numberOfShipElement);
-                    event.dataTransfer.setData('shipElements', JSON.stringify(ship.elementsGridProperties));
-
-                    // unblock blocked fields
-                    ship.boardFields.forEach(field => field.unblockField(ship));
-                    ship.aroundFields.forEach(field => field.unblockField(ship));
-                    ship.aroundFields = [];
-                };
+                
+                field.htmlElement.ondragstart = (event) => dragAndDropHelper.onDragStart(event, {
+                    ship: ship,
+                    shipSelectedElement: field.numberOfShipElement,
+                }, ship.elementsGridProperties, true);
             });
 
             // update scope and other components
@@ -196,6 +193,10 @@ export default {
             }
         },
         targetsInBoardBoundary(event) {
+            if (!event.dataTransfer.getData('ship')) {
+                return null;
+            }
+
             let shipElements = JSON.parse(event.dataTransfer.getData('shipElements'));
             let numberOfShipSelectedElement = parseInt(event.dataTransfer.getData('shipSelectedElement'));
             let shipSelectedElement = shipElements[numberOfShipSelectedElement - 1];

@@ -3,6 +3,8 @@ const $ = require("jquery");
 let id = 0;
 
 export class Ship {
+    static clonedShipIdPrefix = 'clonedShip';
+
     constructor() {
         this.id = id++;
         this.elementsCount = 0;
@@ -10,6 +12,7 @@ export class Ship {
         this.boardFields = [];
         this.aroundFields = [];
         this.hitElements = [];
+        this.fieldsParent = null;
         this.poses = [];
         this.actualPose = 0;
 

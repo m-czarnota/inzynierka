@@ -15,4 +15,4 @@ import './styles/app.scss';
 import './bootstrap';
 
 // Vue
-import './appVue';
+// import './appVue';

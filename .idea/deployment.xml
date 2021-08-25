@@ -5,8 +5,7 @@
       <paths name="localhost">
         <serverdata>
           <mappings>
-            <mapping deploy="/code/inzynierka" local="$PROJECT_DIR$" web="/" />
-            <mapping local="" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
