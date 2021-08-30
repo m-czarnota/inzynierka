@@ -26,6 +26,10 @@ class GameState {
         });
     }
 
+    findShipToDraggingById(id) {
+        return this.shipsToDragging.find(ship => ship && ship.id === id);
+    }
+
     checkIfCoordinatesAreInBoardBoundary(row, column) {
         return !(column < 0 || column >= this.boardArrangeFields.length || row < 0 || row >= this.boardArrangeFields.length);
     }

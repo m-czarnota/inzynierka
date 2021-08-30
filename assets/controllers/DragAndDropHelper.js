@@ -17,7 +17,7 @@ class DragAndDropHelper {
         this.selectedShipElement = this.shipElements[this.shipSelectedElement - 1];
     }
 
-    onDragStart(event, data = null, shipElements = null, clear = false) {
+    onDragStart(event, data = null, shipElements = null, setShipAsStringify = false) {
         if (data) {
             this.setDataToDrag(data);
         }
@@ -27,16 +27,37 @@ class DragAndDropHelper {
             return;
         }
 
-        event.dataTransfer.setData('ship', this.servicedShip.id);
+        this.setDragImage(event);
+
+        this.servicedShip.boardFields.forEach(field => field.unblockField(this.servicedShip));
+        this.servicedShip.aroundFields.forEach(field => field.unblockField(this.servicedShip));
+        this.servicedShip.aroundFields = [];
+
+        this.setDataTransfer(event, shipElements, setShipAsStringify);
+    }
+
+    getDataTransfer(event) {
+        let object = {
+            shipId: event.dataTransfer.getData('shipId'),
+            shipSelectedElement: event.dataTransfer.getData('shipSelectedElement'),
+            shipElements: event.dataTransfer.getData('shipElements')
+        };
+
+        let ship = JSON.parse(event.dataTransfer.getData('stringifyShip'));
+        if (ship) {
+            object['ship'] = ship;
+        }
+
+        return object;
+    }
+
+    setDataTransfer(event, shipElements = null, setStringifyShip = false) {
+        event.dataTransfer.setData('shipId', this.servicedShip.id);
         event.dataTransfer.setData('shipSelectedElement', this.shipSelectedElement);
         event.dataTransfer.setData('shipElements', JSON.stringify(shipElements ?? this.shipElements));
 
-        this.setDragImage(event);
-
-        if (clear) {
-            this.servicedShip.boardFields.forEach(field => field.unblockField(this.servicedShip));
-            this.servicedShip.aroundFields.forEach(field => field.unblockField(this.servicedShip));
-            this.servicedShip.aroundFields = [];
+        if (setStringifyShip) {
+            event.dataTransfer.setData('stringifyShip', JSON.stringify(this.servicedShip));
         }
     }
 

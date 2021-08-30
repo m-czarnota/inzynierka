@@ -15,6 +15,7 @@ import FieldComponent from "./FieldComponent";
 import {gameState} from "./GameState";
 import {dragAndDropHelper} from "./DragAndDropHelper";
 import {BoardField} from "./BoardField";
+import {emitter} from "./Emitter";
 
 export default {
     name: "Board",
@@ -45,8 +46,8 @@ export default {
                 return;
             }
 
-            let shipId = parseInt(event.dataTransfer.getData('ship'));
-            let ship = gameState.shipsToDragging.find(shipToFind => shipToFind && shipToFind.id === shipId);
+            let shipId = parseInt(event.dataTransfer.getData('shipId'));
+            let ship = gameState.findShipToDraggingById(shipId);
 
             if (!ship) {
                 ship = this.ships.find(shipToFind => shipToFind.id === shipId);
@@ -114,10 +115,13 @@ export default {
                         Object.defineProperty(event, 'target', {
                             value: ship.boardFields[parseInt(event.dataTransfer.getData('shipSelectedElement')) - 1].htmlElement
                         });
-                        this.onDrop(event);
+
+                        if (gameState.shipsToDragging[ship.id]) {
+                            this.onDrop(event);
+                        }
                     }, ship.timeToRestoreShipOnLastPosition);
                 };
-                
+
                 field.htmlElement.ondragstart = (event) => dragAndDropHelper.onDragStart(event, {
                     ship: ship,
                     shipSelectedElement: field.numberOfShipElement,
@@ -125,7 +129,7 @@ export default {
             });
 
             // update scope and other components
-            this.$parent.$forceUpdate();
+            emitter.emit('drop-complete', true);
         },
         onDragEnter(event) {
             // TODO change cursor on blocked when is cannot place the ship
@@ -193,7 +197,7 @@ export default {
             }
         },
         targetsInBoardBoundary(event) {
-            if (!event.dataTransfer.getData('ship')) {
+            if (!event.dataTransfer.getData('shipId')) {
                 return null;
             }
 

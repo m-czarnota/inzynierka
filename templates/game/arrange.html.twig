@@ -7,8 +7,7 @@
 
 {% block body %}
     <div id="app">
-        <ship-component v-if="gameState.shipsToDragging[9] !== null"
-                        :ship="gameState.shipsToDragging[9]"></ship-component>
+        <ships-storage></ships-storage>
         <board></board>
     </div>
 {% endblock %}

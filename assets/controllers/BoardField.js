@@ -38,8 +38,9 @@ export class BoardField {
 
     unblockField(shipPointer) {
         this.shipPointer = null;
-        this.numberOfShipElement = -1;
         this.isNextToShipPointers.splice(this.isNextToShipPointers.indexOf(shipPointer), 1);
+
+        this.numberOfShipElement = -1;
         this.htmlElement.removeAttribute('draggable');
 
         if (!this.isNextToShipPointers.length) {

@@ -1,6 +1,5 @@
 <template>
-    <ship-component v-if="ships[8] !== null" :ship="ships[8]"></ship-component>
-    <ship-component v-if="ships[9] !== null" :ship="ships[9]"></ship-component>
+    <ships-storage></ships-storage>
     <board></board>
 </template>
 
@@ -8,10 +7,11 @@
 import Board from "./Board";
 import ShipComponent from "./ShipComponent";
 import {gameState} from "./GameState";
+import ShipsStorage from "./ShipsStorage";
 
 export default {
     name: "ArrangeShips",
-    components: {ShipComponent, Board},
+    components: {ShipsStorage, ShipComponent, Board},
     data() {
         return {
             ships: gameState.shipsToDragging
