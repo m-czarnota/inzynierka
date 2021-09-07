@@ -3,7 +3,7 @@ const $ = require("jquery");
 let id = 0;
 
 export class Ship {
-    static clonedShipIdPrefix = 'clonedShip';
+    static clonedShipIdPrefix = 'clonedShipNode';
 
     constructor() {
         this.id = id++;
@@ -21,19 +21,40 @@ export class Ship {
     }
 
     rotate(event) {
-        let target = event instanceof HTMLElement ? event : event.target;
+        const target = event instanceof HTMLElement ? event : event.target.previousSibling;
         this.elementsGridProperties = [];
 
-        $(target).prev().children().each((index, element) => {
+        $(target).children().each((index, element) => {
             $(element).css(this.poses[this.actualPose][index]);
             this.elementsGridProperties.push({
                 column: $(element).css('gridColumnStart'),
                 row: $(element).css('gridRowStart'),
             });
         });
+
+        this.actualPoseIncrement();
+        this.cloneNode(target);
+    }
+
+    cloneNode(node) {
+        this.fieldsParent = node.cloneNode(true);
+        this.fieldsParent.id = Ship.clonedShipIdPrefix + this.id;
+        this.fieldsParent.style.position = 'absolute';
+        this.fieldsParent.style.top = '-1000px';
+    }
+
+    actualPoseIncrement() {
         this.actualPose++;
 
         if (this.actualPose >= this.poses.length) {
+            this.actualPose = 0;
+        }
+    }
+
+    actualPoseDecrement() {
+        this.actualPose--;
+
+        if (this.actualPose < 0) {
             this.actualPose = 0;
         }
     }

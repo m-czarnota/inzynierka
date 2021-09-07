@@ -17,7 +17,7 @@ class DragAndDropHelper {
         this.selectedShipElement = this.shipElements[this.shipSelectedElement - 1];
     }
 
-    onDragStart(event, data = null, shipElements = null, setShipAsStringify = false) {
+    onDragStart(event, data = null, shipElements = null, additionalData = null) {
         if (data) {
             this.setDataToDrag(data);
         }
@@ -33,31 +33,24 @@ class DragAndDropHelper {
         this.servicedShip.aroundFields.forEach(field => field.unblockField(this.servicedShip));
         this.servicedShip.aroundFields = [];
 
-        this.setDataTransfer(event, shipElements, setShipAsStringify);
+        this.setDataTransfer(event, shipElements, additionalData);
     }
 
     getDataTransfer(event) {
-        let object = {
+        return {
             shipId: event.dataTransfer.getData('shipId'),
             shipSelectedElement: event.dataTransfer.getData('shipSelectedElement'),
             shipElements: event.dataTransfer.getData('shipElements')
         };
-
-        let ship = JSON.parse(event.dataTransfer.getData('stringifyShip'));
-        if (ship) {
-            object['ship'] = ship;
-        }
-
-        return object;
     }
 
-    setDataTransfer(event, shipElements = null, setStringifyShip = false) {
+    setDataTransfer(event, shipElements = null, additionalData = null) {
         event.dataTransfer.setData('shipId', this.servicedShip.id);
         event.dataTransfer.setData('shipSelectedElement', this.shipSelectedElement);
         event.dataTransfer.setData('shipElements', JSON.stringify(shipElements ?? this.shipElements));
 
-        if (setStringifyShip) {
-            event.dataTransfer.setData('stringifyShip', JSON.stringify(this.servicedShip));
+        if (additionalData) {
+            Object.keys(additionalData).forEach(key => event.dataTransfer.setData(key, additionalData[key]));
         }
     }
 

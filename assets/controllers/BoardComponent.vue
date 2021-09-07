@@ -12,10 +12,11 @@
 
 <script>
 import FieldComponent from "./FieldComponent";
-import {gameState} from "./GameState";
 import {dragAndDropHelper} from "./DragAndDropHelper";
 import {BoardField} from "./BoardField";
 import {emitter} from "./Emitter";
+import {shipsStorage} from "./ShipsStorage";
+import {board} from "./Board";
 
 export default {
     name: "Board",
@@ -23,19 +24,19 @@ export default {
     data() {
         return {
             size: 10,
-            ships: [],
         };
     },
     mounted() {
         this.$refs.board.querySelectorAll('.board-row').forEach((row, index) => {
-            gameState.boardArrangeFields.push([]);
+            board.fields.push([]);
             row.querySelectorAll('.board-cell').forEach(fieldHtml => {
                 let boardField = new BoardField();
+
                 boardField.calculateCoordinates(fieldHtml.getAttribute('data-coordinates'));
                 fieldHtml.removeAttribute('data-coordinates');
                 boardField.htmlElement = fieldHtml;
 
-                gameState.boardArrangeFields[index].push(boardField);
+                board.fields[index].push(boardField);
             });
         });
     },
@@ -47,13 +48,12 @@ export default {
             }
 
             let shipId = parseInt(event.dataTransfer.getData('shipId'));
-            let ship = gameState.findShipToDraggingById(shipId);
+            let ship = board.findShipById(shipId);
 
             if (!ship) {
-                ship = this.ships.find(shipToFind => shipToFind.id === shipId);
-            } else {
-                this.ships.push(ship);
-                gameState.shipsToDragging[gameState.shipsToDragging.indexOf(ship)] = null;
+                ship = shipsStorage.ships.find(shipToFind => shipToFind.id === shipId);
+                board.ships.push(ship);
+                shipsStorage.ships.splice(shipsStorage.ships.indexOf(ship), 1);
             }
 
             dragAndDropHelper.removeShipHtml(ship);
@@ -77,8 +77,8 @@ export default {
 
             // place dragged ship on board
             shipMovingProperty.shipElements.forEach((shipElement, index) => {
-                let coordinatesShip = gameState.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
-                let shipField = gameState.getFieldForShipElement(shipMovingProperty, shipElement);
+                let coordinatesShip = board.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
+                let shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
 
                 // base operations
                 shipField.blockField();
@@ -90,18 +90,16 @@ export default {
                 // block around fields
                 let coordinatesToAroundFields = this.getCoordinatesToAroundFields(coordinatesShip.row, coordinatesShip.column);
                 coordinatesToAroundFields.forEach(coordinates => {
-                    if (!gameState.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column)) {
+                    if (!board.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column)) {
                         return;
                     }
 
-                    let fieldAroundShip = gameState.boardArrangeFields[coordinates.row][coordinates.column];
+                    let fieldAroundShip = board.fields[coordinates.row][coordinates.column];
                     if (!fieldAroundShip.shipPointer && !fieldAroundShip.isNextToShipPointers.find(item => item === ship)) {
                         // field does not belong to other ship
                         fieldAroundShip.blockField(ship);
                         ship.aroundFields.push(fieldAroundShip);
                     }
-
-                    // TODO allow drag placed ship from his place out of board (delete this ship from this.ships)
                 });
             });
 
@@ -116,7 +114,7 @@ export default {
                             value: ship.boardFields[parseInt(event.dataTransfer.getData('shipSelectedElement')) - 1].htmlElement
                         });
 
-                        if (gameState.shipsToDragging[ship.id]) {
+                        if (board.findShipById(ship.id)) {
                             this.onDrop(event);
                         }
                     }, ship.timeToRestoreShipOnLastPosition);
@@ -125,7 +123,9 @@ export default {
                 field.htmlElement.ondragstart = (event) => dragAndDropHelper.onDragStart(event, {
                     ship: ship,
                     shipSelectedElement: field.numberOfShipElement,
-                }, ship.elementsGridProperties, true);
+                }, ship.elementsGridProperties, {
+                    'dragFromBoard': true,
+                });
             });
 
             // update scope and other components
@@ -140,7 +140,7 @@ export default {
         },
         setAppropriateColorForAllFields() {
             // TODO better colors
-            for (let field of gameState.boardArrangeFields.flat()) {
+            for (let field of board.fields.flat()) {
                 if (field.shipPointer) {
                     field.htmlElement.style.backgroundColor = 'red';
                 } else if (field.isNextToShipPointers.length) {
@@ -151,7 +151,7 @@ export default {
             }
         },
         canPlaceShipOnBoardField(event) {
-            for (let [index, field] of gameState.boardArrangeFields.flat().entries()) {
+            for (let [index, field] of board.fields.flat().entries()) {
                 if (event.target !== field.htmlElement) {
                     continue;
                 }
@@ -162,7 +162,7 @@ export default {
                 }
 
                 for (let shipElement of shipMovingProperty.shipElements) {
-                    let shipField = gameState.getFieldForShipElement(shipMovingProperty, shipElement);
+                    let shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
 
                     if (!shipField.isActive) {
                         return false;
@@ -188,7 +188,7 @@ export default {
             let shipMovingProperty = this.targetsInBoardBoundary(event);
             if (shipMovingProperty) {
                 shipMovingProperty.shipElements.forEach((shipElement) => {
-                    let boardField = gameState.getFieldForShipElement(shipMovingProperty, shipElement);
+                    let boardField = board.getFieldForShipElement(shipMovingProperty, shipElement);
 
                     if (boardField.isActive) {
                         boardField.htmlElement.style.backgroundColor = addColor ? color : '';
@@ -206,15 +206,15 @@ export default {
             let shipSelectedElement = shipElements[numberOfShipSelectedElement - 1];
 
             let targetCoordinates = (() => {
-                for (let [index, field] of gameState.boardArrangeFields.flat().entries()) {
+                for (let [index, field] of board.fields.flat().entries()) {
                     if (event.target === field.htmlElement) {
-                        return gameState.calculateFieldPositionFromIndex(index);
+                        return board.calculateFieldPositionFromIndex(index);
                     }
                 }
             })();
 
             for (let shipElementGridValues of shipElements) {
-                if (!gameState.getFieldForShipElement(
+                if (!board.getFieldForShipElement(
                     {targetCoordinates: targetCoordinates, shipSelectedElement: shipSelectedElement},
                     shipElementGridValues
                 )) {

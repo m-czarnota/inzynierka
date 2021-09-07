@@ -3,9 +3,8 @@ import {configureCompat} from "@vue/compat";
 require('./controllers/GameState');
 
 import {createApp} from "vue";
-import Board from "./controllers/Board";
-import ShipComponent from "./controllers/ShipComponent";
-import ShipsStorage from "./controllers/ShipsStorage";
+import BoardComponent from "./controllers/BoardComponent";
+import ShipsStorageComponent from "./controllers/ShipsStorageComponent";
 import {gameState} from "./controllers/GameState";
 import {emitter} from "./controllers/Emitter";
 
@@ -19,7 +18,7 @@ const app = createApp({
             gameState: gameState
         };
     },
-    components: {Board, ShipsStorage},
+    components: {BoardComponent, ShipsStorageComponent},
     delimiters: ['${', '}$'],
 });
 app.config.globalProperties.emitter = emitter;

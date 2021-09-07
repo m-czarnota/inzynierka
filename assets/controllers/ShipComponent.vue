@@ -1,13 +1,18 @@
 <template>
-    <div class="board-ship" ref="x">
-        <field-component :coordinates-prop="'A1'" v-for="n in ship.elementsCount" class="board-ship-element"
-                         :data-element-number="n" draggable="true"
-                         @dragstart="dragAndDropHelper.onDragStart($event, {
-                            ship: ship,
-                            shipSelectedElement: n
-                        })"></field-component>
+    <div class="ship-component">
+        <div class="board-ship" ref="x" :aria-label="ship.elementsCount">
+            <field-component :coordinates-prop="'A1'"
+                             v-for="n in ship.elementsCount"
+                             class="board-ship-element"
+                             :data-element-number="n"
+                             draggable="true"
+                             @dragstart="dragAndDropHelper.onDragStart($event, {
+                                ship: ship,
+                                shipSelectedElement: n
+                            })"></field-component>
+        </div>
+        <button @click="ship.rotate($event)" v-if="ship.elementsCount > 1">Rotate</button>
     </div>
-    <button @click="ship.rotate($event)" v-if="ship.elementsCount > 1">Rotate</button>
 </template>
 
 <script>
@@ -26,37 +31,28 @@ export default {
     data() {
         return {
             id: id++,
-            isFirstRotate: false,
-            gridSize: 0,
-            dragAndDropHelper: dragAndDropHelper
+            dragAndDropHelper: dragAndDropHelper,
         }
     },
     props: ['elementsCountProp', 'ship'],
     methods: {},
     mounted() {
-        let ship = this.$refs.x;
-        let shipElementSize = ship.querySelector('.board-cell').offsetWidth;
-        this.gridSize = shipElementSize + 10;
-        BoardField.gridSize = this.gridSize;
+        const shipNode = this.$refs.x;
+        const shipElementSize = shipNode.querySelector('.board-cell').offsetWidth;
 
-        ship.style.display = 'grid';
-        ship.style.gridTemplateColumns = '';
-        ship.style.gridTemplateRows = '';
+        const gridSize = shipElementSize + 10;
+        BoardField.gridSize = gridSize;
+
+        shipNode.style.display = 'grid';
+        shipNode.style.gridTemplateColumns = '';
+        shipNode.style.gridTemplateRows = '';
 
         for (let i = 0; i < this.ship.elementsCount; i++) {
-            ship.style.gridTemplateColumns += `[column${i + 1}] ${this.gridSize}px `;
-            ship.style.gridTemplateRows += `[row${i + 1}] ${this.gridSize}px `;
+            shipNode.style.gridTemplateColumns += `[column${i + 1}] ${gridSize}px `;
+            shipNode.style.gridTemplateRows += `[row${i + 1}] ${gridSize}px `;
         }
 
-        if (!this.isFirstRotate) {
-            this.ship.rotate(ship.nextSibling);
-            this.isFirstRotate = true;
-        }
-
-        this.ship.fieldsParent = ship.cloneNode(true);
-        this.ship.fieldsParent.id = Ship.clonedShipIdPrefix + this.ship.id;
-        this.ship.fieldsParent.style.position = 'absolute';
-        this.ship.fieldsParent.style.top = '-1000px';
+        this.ship.rotate(shipNode);
     },
 }
 </script>
