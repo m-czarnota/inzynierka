@@ -1,0 +1,42 @@
+@import "palette";
+
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  min-height: 20px;
+  min-width: 20px;
+  max-height: 20px;
+  max-width: 20px;
+  background-color: $board-cell-background;
+  margin: 5px;
+  border-radius: 3px;
+  border: 1px solid $board-cell-border;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $board-cell-background-hover;
+  }
+}
+
+.board-cell-disable {
+  background-color: $board-cell-background-disable;
+  cursor: default;
+}
+
+.board-ship {
+  display: grid;
+}
+
+.ship-component {
+  margin: 1em;
+  border: 1px solid $ship-component-border;
+}
+
+.ships-storage-component {
+  background-color: $ships-storage-component-background;
+  min-width: 100%;
+  min-height: 300px;
+  padding: 0.5em 0.25em;
+}

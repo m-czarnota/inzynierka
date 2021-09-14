@@ -1,46 +1,8 @@
+@use "game/loader";
+
 @import "~bootstrap";
+@import "palette";
 
 body {
-  background-color: lightgray;
-}
-
-.board-row {
-  display: flex;
-}
-
-.board-cell {
-  min-height: 20px;
-  min-width: 20px;
-  max-height: 20px;
-  max-width: 20px;
-  background-color: hsl(140, 25%, 68%);
-  margin: 5px;
-  border-radius: 3px;
-  border: 1px solid black;
-  cursor: pointer;
-
-  &:hover {
-    background-color: hsl(140, 75%, 68%);
-  }
-}
-
-.board-cell-disable {
-  background-color: hsl(140, 75%, 68%);
-  cursor: default;
-}
-
-.board-ship {
-  display: grid;
-}
-
-.ship-component {
-  margin: 1em;
-  border: 1px solid gray;
-}
-
-.ships-storage-component {
-  background-color: brown;
-  min-width: 100%;
-  min-height: 300px;
-  padding: 0.5em 0.25em;
+  background-color: $body-background;
 }

@@ -20,7 +20,7 @@ class SeasonRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return Season[] Returns an array of Season objects
+    //  * @return Season[] Returns an array of Season entities
     //  */
     /*
     public function findByExampleField($value)

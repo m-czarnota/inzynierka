@@ -20,7 +20,7 @@ class WinnedCombinationRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return WinnedCombination[] Returns an array of WinnedCombination objects
+    //  * @return WinnedCombination[] Returns an array of WinnedCombination entities
     //  */
     /*
     public function findByExampleField($value)

@@ -1,12 +1,12 @@
 import {configureCompat} from "@vue/compat";
 
-require('./controllers/GameState');
+require('./services/GameState');
 
 import {createApp} from "vue";
-import BoardComponent from "./controllers/BoardComponent";
-import ShipsStorageComponent from "./controllers/ShipsStorageComponent";
-import {gameState} from "./controllers/GameState";
-import {emitter} from "./controllers/Emitter";
+import BoardComponent from "./components/BoardComponent";
+import ShipsStorageComponent from "./components/ShipsStorageComponent";
+import {gameState} from "./services/GameState";
+import {emitter} from "./services/Emitter";
 
 configureCompat({
     WATCH_ARRAY: true,

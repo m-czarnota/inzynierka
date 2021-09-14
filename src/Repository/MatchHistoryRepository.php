@@ -20,7 +20,7 @@ class MatchHistoryRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return MatchHistory[] Returns an array of MatchHistory objects
+    //  * @return MatchHistory[] Returns an array of MatchHistory entities
     //  */
     /*
     public function findByExampleField($value)

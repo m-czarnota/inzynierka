@@ -17,8 +17,8 @@ export class BoardField {
     calculateCoordinates(coordinates = null) {
         this.coordinates = coordinates ?? this.coordinates;
 
-        let center = Math.floor(this.coordinates.length / 2);
-        let char = parseInt(this.coordinates.substring(0, center)) + 64;
+        const center = Math.floor(this.coordinates.length / 2);
+        let char = parseInt(this.coordinates.substring(0, center)) + 'A'.charCodeAt(0);
         let number = this.coordinates.substring(center);
 
         if (number.length === 2 && number[0] === '0') {
@@ -32,6 +32,8 @@ export class BoardField {
     blockField(shipPointer) {
         this.isActive = false;
         this.isNextToShipPointers.push(shipPointer);
+
+        // TODO better styles assign
         this.htmlElement.style.backgroundColor = 'grey';
         this.htmlElement.style.cursor = 'default';
     }
@@ -47,7 +49,6 @@ export class BoardField {
             this.isActive = true;
             this.htmlElement.style.backgroundColor = '';
             this.htmlElement.style.cursor = '';
-
         }
     }
 }

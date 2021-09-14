@@ -6,9 +6,9 @@
                              class="board-ship-element"
                              :data-element-number="n"
                              draggable="true"
-                             @dragstart="dragAndDropHelper.onDragStart($event, {
+                             @dragstart="dragDropShipHelper.onDragStart($event, {
                                 ship: ship,
-                                shipSelectedElement: n
+                                numberOfShipSelectedElement: n
                             })"></field-component>
         </div>
         <button @click="ship.rotate($event)" v-if="ship.elementsCount > 1">Rotate</button>
@@ -17,9 +17,8 @@
 
 <script>
 import FieldComponent from "./FieldComponent";
-import {BoardField} from "./BoardField";
-import {dragAndDropHelper} from "./DragAndDropHelper";
-import {Ship} from "./Ship";
+import {BoardField} from "../entities/BoardField";
+import {dragDropShipHelper} from "../services/DragDropShipHelper";
 
 const $ = require('jquery');
 
@@ -31,7 +30,7 @@ export default {
     data() {
         return {
             id: id++,
-            dragAndDropHelper: dragAndDropHelper,
+            dragDropShipHelper: dragDropShipHelper,
         }
     },
     props: ['elementsCountProp', 'ship'],

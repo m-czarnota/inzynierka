@@ -20,7 +20,7 @@ class GameRoomRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return GameRoom[] Returns an array of GameRoom objects
+    //  * @return GameRoom[] Returns an array of GameRoom entities
     //  */
     /*
     public function findByExampleField($value)

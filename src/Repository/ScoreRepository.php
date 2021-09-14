@@ -20,7 +20,7 @@ class ScoreRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return Score[] Returns an array of Score objects
+    //  * @return Score[] Returns an array of Score entities
     //  */
     /*
     public function findByExampleField($value)

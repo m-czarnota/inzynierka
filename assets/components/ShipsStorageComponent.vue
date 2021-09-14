@@ -8,10 +8,10 @@
 
 <script>
 import ShipComponent from "./ShipComponent";
-import {dragAndDropHelper} from "./DragAndDropHelper";
-import {emitter} from "./Emitter";
-import {board} from "./Board";
-import {shipsStorage} from "./ShipsStorage";
+import {dragDropShipHelper} from "../services/DragDropShipHelper";
+import {emitter} from "../services/Emitter";
+import {board} from "../entities/Board";
+import {shipsStorage} from "../entities/ShipsStorage";
 
 export default {
     name: "ShipsStorageComponent",
@@ -27,7 +27,7 @@ export default {
                 return;
             }
 
-            const dataTransfer = dragAndDropHelper.getDataTransfer(event);
+            const dataTransfer = dragDropShipHelper.getDataTransfer(event);
             const ship = board.findShipById(dataTransfer.shipId);
 
             clearTimeout(ship.timerToRestoreShipOnLastPosition);
@@ -36,7 +36,7 @@ export default {
             shipsStorage.ships.push(ship);
             board.ships.splice(board.ships.indexOf(ship), 1);
 
-            dragAndDropHelper.removeShipHtml(ship);
+            dragDropShipHelper.removeShipHtml(ship);
 
             setTimeout(() => this.$forceUpdate(), 100);
         },

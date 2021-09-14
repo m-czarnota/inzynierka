@@ -20,7 +20,7 @@ class GameRepository extends ServiceEntityRepository
     }
 
     // /**
-    //  * @return Game[] Returns an array of Game objects
+    //  * @return Game[] Returns an array of Game entities
     //  */
     /*
     public function findByExampleField($value)
