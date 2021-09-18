@@ -1,1 +1,11 @@
 {% extends 'base.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('appGame') }}
+{% endblock %}
+
+{% block body %}
+    <input type="hidden" id="route-to-game" value="{{ path('app_game') }}">
+    <div id="app"></div>
+{% endblock %}

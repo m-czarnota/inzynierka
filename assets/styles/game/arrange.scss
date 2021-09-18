@@ -1,5 +1,9 @@
 @import "palette";
 
+.arrange-main {
+  display: flex;
+}
+
 .board-row {
   display: flex;
 }
@@ -36,7 +40,6 @@
 
 .ships-storage-component {
   background-color: $ships-storage-component-background;
-  min-width: 100%;
   min-height: 300px;
   padding: 0.5em 0.25em;
 }

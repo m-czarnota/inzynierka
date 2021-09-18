@@ -1,5 +1,7 @@
 <template>
-    <div class="board" ref="board">
+    <div class="board"
+         ref="board"
+         :class="{ 'col-6': $router.currentRoute.value.name === 'Arrange Ships' }">
         <div v-for="n in size" class="board-row">
             <field-component v-for="k in size" :data-coordinates="n + '' + k"
                              @drop="dragDropShipHelper.onDrop($event)"
@@ -12,12 +14,12 @@
 
 <script>
 import FieldComponent from "./FieldComponent";
-import {dragDropShipHelper} from "../services/DragDropShipHelper";
-import {BoardField} from "../entities/BoardField";
-import {board} from "../entities/Board";
+import {dragDropShipHelper} from "../../services/DragDropShipHelper";
+import {BoardField} from "../../entities/game/BoardField";
+import {board} from "../../entities/game/Board";
 
 export default {
-    name: "Board",
+    name: "BoardComponent",
     components: {FieldComponent},
     data() {
         return {

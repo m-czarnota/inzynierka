@@ -1,7 +1,7 @@
-import {BoardField} from "../entities/BoardField";
-import {Ship} from "../entities/Ship";
-import {board} from "../entities/Board";
-import {shipsStorage} from "../entities/ShipsStorage";
+import {BoardField} from "../entities/game/BoardField";
+import {Ship} from "../entities/game/Ship";
+import {board} from "../entities/game/Board";
+import {shipsStorage} from "../entities/game/ShipsStorage";
 import {emitter} from "./Emitter";
 
 class DragDropShipHelper {

@@ -9,10 +9,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class GameController extends AbstractController
 {
     /**
-     * @Route (path="/arrange", name="app_game_arrange")
+     * @Route (path="/game/{optional}", defaults={"optional"=""}, name="app_game")
      */
     public function arrangeAction(): Response
     {
-        return $this->render('game/arrange.html.twig');
+        return $this->render('game/base.html.twig');
     }
 }
