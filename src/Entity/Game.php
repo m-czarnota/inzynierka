@@ -2,30 +2,26 @@
 
 namespace App\Entity;
 
+use App\Entity\Enums\GameStateEnum;
+use App\Entity\Enums\KindOfGameEnum;
 use App\Repository\GameRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass=GameRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 class Game
 {
+    use TimestampableEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $modifiedAt;
 
     /**
      * @ORM\OneToOne(targetEntity=GameRoom::class, inversedBy="game", cascade={"persist", "remove"})
@@ -38,33 +34,31 @@ class Game
      */
     private $users = [];
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @var int
+     */
+    private int $kindOfGame;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     * @var int
+     */
+    private int $gameState;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $gameInfo = [];
+
+    public function __construct()
+    {
+        $this->gameState = GameStateEnum::CREATED;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getModifiedAt(): ?\DateTimeInterface
-    {
-        return $this->modifiedAt;
-    }
-
-    public function setModifiedAt(\DateTimeInterface $modifiedAt): self
-    {
-        $this->modifiedAt = $modifiedAt;
-
-        return $this;
     }
 
     public function getGameRoom(): ?GameRoom
@@ -90,4 +84,42 @@ class Game
 
         return $this;
     }
+
+    public function getKindOfGame(): int
+    {
+        return $this->kindOfGame;
+    }
+
+    public function setKindOfGame(int $kindOfGame): self
+    {
+        $this->kindOfGame = $kindOfGame;
+
+        return $this;
+    }
+
+    public function getGameState(): int
+    {
+        return $this->gameState;
+    }
+
+    public function setGameState(int $gameState): self
+    {
+        $this->gameState = $gameState;
+
+        return $this;
+    }
+
+    public function getGameInfo(): ?array
+    {
+        return $this->gameInfo;
+    }
+
+    public function setGameInfo(array $gameInfo): self
+    {
+        $this->gameInfo = $gameInfo;
+
+        return $this;
+    }
+
+
 }

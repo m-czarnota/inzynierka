@@ -15,6 +15,7 @@ export class Ship {
         this.fieldsParent = null;
         this.poses = [];
         this.actualPose = 0;
+        this.wasFirstRotate = false;
 
         this.timerToRestoreShipOnLastPosition = null;
         this.timeToRestoreShipOnLastPosition = 1000;
@@ -23,6 +24,7 @@ export class Ship {
     rotate(event) {
         const target = event instanceof HTMLElement ? event : event.target.previousSibling;
         this.elementsGridProperties = [];
+        this.wasFirstRotate = true;
 
         $(target).children().each((index, element) => {
             $(element).css(this.poses[this.actualPose][index]);

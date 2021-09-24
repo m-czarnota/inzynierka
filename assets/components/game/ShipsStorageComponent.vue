@@ -1,5 +1,7 @@
 <template>
-    <div class="ships-storage-component" @drop="onDrop($event)" @dragover.prevent ref="shipsStorage">
+    <div class="ships-storage-component col-6"
+         @drop="onDrop($event)"
+         @dragover.prevent ref="shipsStorage">
         <template v-for="ship in ships" :key="ship.id">
             <ship-component :ship="ship"></ship-component>
         </template>
@@ -8,10 +10,10 @@
 
 <script>
 import ShipComponent from "./ShipComponent";
-import {dragDropShipHelper} from "../services/DragDropShipHelper";
-import {emitter} from "../services/Emitter";
-import {board} from "../entities/Board";
-import {shipsStorage} from "../entities/ShipsStorage";
+import {dragDropShipHelper} from "../../services/DragDropShipHelper";
+import {emitter} from "../../services/Emitter";
+import {board} from "../../entities/game/Board";
+import {shipsStorage} from "../../entities/game/ShipsStorage";
 
 export default {
     name: "ShipsStorageComponent",

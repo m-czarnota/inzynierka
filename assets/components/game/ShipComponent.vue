@@ -17,8 +17,8 @@
 
 <script>
 import FieldComponent from "./FieldComponent";
-import {BoardField} from "../entities/BoardField";
-import {dragDropShipHelper} from "../services/DragDropShipHelper";
+import {BoardField} from "../../entities/game/BoardField";
+import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 
 const $ = require('jquery');
 
@@ -49,6 +49,10 @@ export default {
         for (let i = 0; i < this.ship.elementsCount; i++) {
             shipNode.style.gridTemplateColumns += `[column${i + 1}] ${gridSize}px `;
             shipNode.style.gridTemplateRows += `[row${i + 1}] ${gridSize}px `;
+        }
+
+        if (this.ship.wasFirstRotate) {
+            this.ship.actualPoseDecrement();
         }
 
         this.ship.rotate(shipNode);
