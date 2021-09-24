@@ -2,35 +2,45 @@ import {createApp} from "vue";
 import {configureCompat} from "@vue/compat";
 import {createWebHistory, createRouter} from "vue-router";
 
-require('../services/GameState');
-
-import {gameState} from "../services/GameState";
-import {emitter} from "../services/Emitter";
 import ArrangeComponent from "../components/game/ArrangeComponent";
 import GameComponent from "../components/game/GameComponent";
 import MainComponent from "../components/game/MainComponent";
 import NotFoundComponent from "../components/game/NotFoundComponent";
+import KindOfGameComponent from "../components/game/KindOfGameComponent";
 
 configureCompat({
     WATCH_ARRAY: true,
 });
 
-const routeToGame = document.querySelector('#route-to-game').value;
+export const kindsOfGame = JSON.parse(window.atob(document.querySelector('#kinds-of-game').value));
+
+const
+    getRoutePath = id => document.querySelector(`#${id}`).value;
+export const gameRoutes = {
+    'prepareGame': getRoutePath('route-to-game-prepare-game')
+}
+export const routeToGame = document.querySelector('#route-to-game').value;
 
 const routes = [
     {
         path: `${routeToGame}/`,
+        name: 'Kind of Game',
+        component: KindOfGameComponent,
+        alias: `${routeToGame}/kind-of-game`,
+    },
+    {
+        path: `${routeToGame}/arrange`,
         name: 'Arrange Ships',
         component: ArrangeComponent,
-        alias: `${routeToGame}/arrange`,
     },
     {
         path: `${routeToGame}/play`,
-        name: 'Game',
+        name: 'Play',
         component: GameComponent,
     },
     {
         path: `${routeToGame}/:catchAll(.*)`,
+        name: 'Not Found',
         component: NotFoundComponent,
     },
 ];
@@ -41,16 +51,6 @@ const router = createRouter({
 });
 export default router;
 
-// const app = createApp({
-//     data() {
-//         return {
-//             gameState: gameState
-//         };
-//     },
-//     components: {ArrangeComponent},
-//     delimiters: ['${', '}$'],
-// });
-// app.config.globalProperties.emitter = emitter;
 const app = createApp(MainComponent);
 app.use(router);
 app.mount('#app');

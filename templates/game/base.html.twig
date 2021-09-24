@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block body %}
-    <input type="hidden" id="route-to-game" value="{{ path('app_game') }}">
+    <input type="hidden" id="route-to-game" value="{{ path('app_game_arrange') }}">
+    <input type="hidden" id="route-to-game-prepare-game" value="{{ path('app_game_prepare_game') }}">
+    <input type="hidden" id="kinds-of-game" value="{{ kindsOfGame }}">
     <div id="app"></div>
 {% endblock %}

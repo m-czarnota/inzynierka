@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -20,12 +19,12 @@ class User implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $email;
+    private string $email;
 
     /**
      * @var string The hashed password
@@ -51,7 +50,7 @@ class User implements UserInterface
     /**
      * @ORM\ManyToMany(targetEntity=User::class)
      */
-    private ArrayCollection $friends;
+    private Collection $friends;
 
     /**
      * @ORM\OneToOne(targetEntity=Score::class, mappedBy="user", cascade={"persist", "remove"})
@@ -61,12 +60,12 @@ class User implements UserInterface
     /**
      * @ORM\OneToMany(targetEntity=WinnedCombination::class, mappedBy="user", orphanRemoval=true)
      */
-    private ArrayCollection $winnedCombinations;
+    private Collection $winnedCombinations;
 
     /**
      * @ORM\ManyToOne(targetEntity=GameRoom::class)
      */
-    private $gameRoom;
+    private ?GameRoom $gameRoom;
 
     /**
      * @ORM\ManyToOne(targetEntity=Game::class)
@@ -76,7 +75,7 @@ class User implements UserInterface
     /**
      * @ORM\OneToMany(targetEntity=MatchHistory::class, mappedBy="userWin", orphanRemoval=true)
      */
-    private ArrayCollection $matchHistories;
+    private Collection $matchHistories;
 
     /**
      * @ORM\Column(type="json")
@@ -90,9 +89,6 @@ class User implements UserInterface
 
     public function __construct()
     {
-        $this->friends = new ArrayCollection();
-        $this->winnedCombinations = new ArrayCollection();
-        $this->matchHistories = new ArrayCollection();
         $this->gameRoom = null;
         $this->game = null;
     }
@@ -109,7 +105,7 @@ class User implements UserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -119,7 +115,7 @@ class User implements UserInterface
      */
     public function getEmail(): ?string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -127,7 +123,7 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     public function setEmail(string $email): self

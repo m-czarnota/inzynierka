@@ -1,6 +1,6 @@
 class GameState {
     constructor() {
-
+        this.isActiveGame = false;
     }
 
 }
