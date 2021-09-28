@@ -30,7 +30,7 @@ class GameController extends AbstractController
         $kindOfGame = $request->get('kindOfGame');
         if (KindOfGameEnum::isValid($kindOfGame) === false) {
             return new JsonResponse([
-                'status' => 'exception',
+                'state' => 'exception',
                 'message' => 'Sorry, matchmaking is not available. Please try again in a few moments.',
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
@@ -41,16 +41,16 @@ class GameController extends AbstractController
         $opponent = $matchmakingEngine->searchOpponent($user, [
             'kindOfGame' => $kindOfGame,
             'ships' => $request->get('playerShips'),
-        ]);
+        ], $request->get('whichApproach'));
         if (!$opponent) {
             return new JsonResponse([
-                'status' => 'error',
+                'state' => 'error',
                 'message' => 'Sorry, game has not been found.',
             ], Response::HTTP_NO_CONTENT);
         }
 
         $parameters = $matchmakingEngine->saveFoundUsers($user, $opponent);
-        $parameters['status'] = 'ok';
+        $parameters['state'] = 'ok';
 
         return new JsonResponse($parameters);
     }

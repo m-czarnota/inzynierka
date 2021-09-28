@@ -24,12 +24,16 @@ class MatchmakingStorageRepository extends ServiceEntityRepository
      * @param User $user
      * @return array
      */
-    public function findUsersInMatchmakingWithoutOne(User $user): array
+    public function findActiveOpponentsInMatchmaking(User $user): array
     {
         return $this->createQueryBuilder('s')
-            ->select('s.user')
+            ->select('IDENTITY(s.user)')
             ->where('s.user != :userId')
-            ->setParameter('userId', $user->getId())
+            ->andWhere('s.createdAt > :now')
+            ->setParameters([
+                'userId' => $user->getId(),
+                'now' => (new \DateTime())->modify('-30 seconds')
+            ])
             ->getQuery()
             ->getArrayResult();
     }

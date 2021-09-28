@@ -1,3 +1,5 @@
+import {Ship} from "./Ship";
+
 class Board {
     constructor() {
         this.size = 10;
@@ -42,6 +44,14 @@ class Board {
 
         return this.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column) ?
             this.fields[coordinates.row][coordinates.column] : null;
+    }
+
+    mapShipBeforeSaving(key, val) {
+        if (val instanceof Ship) {
+            return val.id;
+        }
+
+        return val;
     }
 }
 
