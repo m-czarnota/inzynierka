@@ -19,7 +19,6 @@ import {shipsStorage} from "../../entities/game/ShipsStorage";
 import GameComponent from "./GameComponent";
 import {gameState} from "../../services/GameState";
 import {board} from "../../entities/game/Board";
-import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {shipPlacementService} from "../../services/ShipPlacementService";
 
 export default {
@@ -34,18 +33,7 @@ export default {
         };
     },
     mounted() {
-        shipsStorage.ships.forEach(ship => {
-            console.log(shipsStorage.ships, board.ships);
-            for (let i = 0; i < 100; i++) {
-                shipPlacementService.drawShipToPlaceOnBoard(ship);
-            }
-            // do {
-            //     console.log('losuje');
-            //     gameState.drawShipToPlaceOnBoard(ship);
-            // } while (!dragDropShipHelper.canPlaceShipOnBoardField(gameState.customEvent));
-
-            dragDropShipHelper.onDrop(shipPlacementService.customEvent);
-        });
+        shipPlacementService.autoPlaceAllShips();
     },
     methods: {
         back() {

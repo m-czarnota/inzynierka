@@ -334,7 +334,7 @@ class DragDropShipHelper {
     }
 
     targetsInBoardBoundary(event) {
-        if (!event.dataTransfer.getData('shipId')) {
+        if (event.dataTransfer.getData('shipId') === null) {
             return null;
         }
 
