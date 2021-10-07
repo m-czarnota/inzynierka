@@ -6,6 +6,7 @@
  */
 
 const $ = require('jquery');
+const Cookies = require('js-cookie');
 
 // any CSS you import will output into a single css file (app.css in this case)
 

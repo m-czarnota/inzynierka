@@ -27,6 +27,15 @@ class GameController extends AbstractController
      */
     public function prepareGame(MatchmakingEngine $matchmakingEngine, Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getGame()) {
+            return new JsonResponse([
+                'linkToRoom' => $user->getGameRoom()->getLink(),
+            ]);
+        }
+
         $kindOfGame = $request->get('kindOfGame');
         if (KindOfGameEnum::isValid($kindOfGame) === false) {
             return new JsonResponse([
@@ -34,9 +43,6 @@ class GameController extends AbstractController
                 'message' => 'Sorry, matchmaking is not available. Please try again in a few moments.',
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
-
-        /** @var User $user */
-        $user = $this->getUser();
 
         $opponent = $matchmakingEngine->searchOpponent($user, [
             'kindOfGame' => $kindOfGame,
@@ -46,13 +52,28 @@ class GameController extends AbstractController
             return new JsonResponse([
                 'state' => 'error',
                 'message' => 'Sorry, game has not been found.',
-            ], Response::HTTP_NO_CONTENT);
+            ], Response::HTTP_ACCEPTED);
         }
 
         $parameters = $matchmakingEngine->saveFoundUsers($user, $opponent);
         $parameters['state'] = 'ok';
 
         return new JsonResponse($parameters);
+    }
+
+    /**
+     * @Route (path="/isUserInGame", name="is_user_in_game")
+     */
+    public function isUserInGame(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $isUserInGame = (bool)$user->getGame();
+
+        return new JsonResponse([
+            'status' => $isUserInGame,
+            'linkToRoom' => $isUserInGame ? $user->getGameRoom()->getLink() : null,
+        ]);
     }
 
     /**

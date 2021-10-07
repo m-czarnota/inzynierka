@@ -7,13 +7,13 @@ class ShipPlacementService {
         this.customEvent = null
     }
 
-    defineCustomEvent(data) {
+    defineCustomEvent(target, ship, selectedElement) {
         this.customEvent = {
-            target: data.target,
+            target: target,
             dataTransfer: {
-                shipId: data.ship.id,
-                numberOfShipSelectedElement: data.selectedElement,
-                shipElements: JSON.stringify(data.ship.elementsGridProperties),
+                shipId: ship.id,
+                numberOfShipSelectedElement: selectedElement,
+                shipElements: JSON.stringify(ship.elementsGridProperties),
                 getData(key) {
                     return this[key];
                 },
@@ -21,18 +21,15 @@ class ShipPlacementService {
         };
     }
 
-    drawShipToPlaceOnBoard(data) {
+    drawShipToPlaceOnBoard(ship, selectedElement) {
         const targetElement = this.drawFieldOnBoard();
 
-        this.defineCustomEvent({
-            target: targetElement,
-            ship: data.ship,
-            selectedElement: data.selectedElement,
-        });
+        this.defineCustomEvent(targetElement, ship, selectedElement);
     }
 
     drawActualPose(ship) {
         ship.actualPose = Math.random() * ship.poses.length | 0;
+        ship.rotate();
         return ship.actualPose;
     }
 
@@ -72,10 +69,7 @@ class ShipPlacementService {
         do {
             loopCount++;
 
-            this.drawShipToPlaceOnBoard({
-                ship: ship,
-                selectedElement: selectedElement,
-            });
+            this.drawShipToPlaceOnBoard(ship, selectedElement);
 
             if (loopCount >= stopCondition) {
                 this.drawActualPose(ship);
@@ -85,6 +79,25 @@ class ShipPlacementService {
         } while (!dragDropShipHelper.canPlaceShipOnBoardField(this.customEvent));
 
         dragDropShipHelper.onDrop(this.customEvent);
+    }
+
+    findShipInArray(ship, array) {
+        return array.find(item => item.id === ship.id);
+    }
+
+    stringifyShips(ships) {
+        ships.forEach(ship => {
+            ship.boardFields.forEach(boardField => boardField.isNextToShipPointers = [...new Set(boardField.isNextToShipPointers)]);
+            ship.aroundFields.forEach(aroundField => aroundField.isNextToShipPointers = [...new Set(aroundField.isNextToShipPointers)]);
+        });
+
+        return JSON.stringify(ships, (key, val) => {
+            if (val instanceof HTMLElement) {
+                return null;
+            }
+
+            return val;
+        });
     }
 }
 

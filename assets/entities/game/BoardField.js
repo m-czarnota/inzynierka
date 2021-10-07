@@ -31,7 +31,7 @@ export class BoardField {
 
     blockField(shipPointer) {
         this.isActive = false;
-        this.isNextToShipPointers.push(shipPointer);
+        this.isNextToShipPointers.push(shipPointer.id);
 
         // TODO better styles assign
         this.htmlElement.style.backgroundColor = 'grey';
@@ -40,7 +40,7 @@ export class BoardField {
 
     unblockField(shipPointer) {
         this.shipPointer = null;
-        this.isNextToShipPointers.splice(this.isNextToShipPointers.indexOf(shipPointer), 1);
+        this.isNextToShipPointers.splice(this.isNextToShipPointers.indexOf(shipPointer.id), 1);
 
         this.numberOfShipElement = -1;
         this.htmlElement.removeAttribute('draggable');

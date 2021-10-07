@@ -3,6 +3,7 @@ import {Ship} from "../entities/game/Ship";
 import {board} from "../entities/game/Board";
 import {shipsStorage} from "../entities/game/ShipsStorage";
 import {emitter} from "./Emitter";
+import {shipPlacementService} from "./ShipPlacementService";
 
 class DragDropShipHelper {
     constructor() {
@@ -181,8 +182,8 @@ class DragDropShipHelper {
             const shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
 
             // base operations
-            shipField.blockField();
-            shipField.shipPointer = ship;
+            shipField.blockField(ship);
+            shipField.shipPointer = ship.id;
             shipField.numberOfShipElement = index + 1;
             shipField.htmlElement.style.backgroundColor = 'red';
             ship.boardFields.push(shipField);
@@ -195,7 +196,7 @@ class DragDropShipHelper {
                 }
 
                 const fieldAroundShip = board.fields[coordinates.row][coordinates.column];
-                if (!fieldAroundShip.shipPointer && !fieldAroundShip.isNextToShipPointers.find(item => item === ship)) {
+                if (fieldAroundShip.shipPointer === null && !shipPlacementService.findShipInArray(ship, fieldAroundShip.isNextToShipPointers)) {
                     // field does not belong to other ship
                     fieldAroundShip.blockField(ship);
                     ship.aroundFields.push(fieldAroundShip);
@@ -274,7 +275,7 @@ class DragDropShipHelper {
     setAppropriateColorForAllFields() {
         // TODO better colors
         for (let field of board.fields.flat()) {
-            if (field.shipPointer) {
+            if (field.shipPointer !== null) {
                 field.htmlElement.style.backgroundColor = 'red';
             } else if (field.isNextToShipPointers.length) {
                 field.htmlElement.style.backgroundColor = 'grey';

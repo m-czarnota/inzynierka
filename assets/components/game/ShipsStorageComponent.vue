@@ -33,7 +33,7 @@ export default {
             const ship = board.findShipById(dataTransfer.shipId);
 
             clearTimeout(ship.timerToRestoreShipOnLastPosition);
-            ship.actualPoseDecrement();
+            // ship.actualPoseDecrement();
 
             shipsStorage.ships.push(ship);
             board.ships.splice(board.ships.indexOf(ship), 1);

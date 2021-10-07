@@ -17,6 +17,7 @@ import FieldComponent from "./FieldComponent";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {BoardField} from "../../entities/game/BoardField";
 import {board} from "../../entities/game/Board";
+import {shipPlacementService} from "../../services/ShipPlacementService";
 
 export default {
     name: "BoardComponent",
@@ -24,22 +25,47 @@ export default {
     data() {
         return {
             size: 10,
-            dragDropShipHelper: dragDropShipHelper
+            dragDropShipHelper: dragDropShipHelper,
+            board: board,
         };
     },
     mounted() {
-        this.$refs.board.querySelectorAll('.board-row').forEach((row, index) => {
-            board.fields.push([]);
-            row.querySelectorAll('.board-cell').forEach(fieldHtml => {
-                const boardField = new BoardField();
+        if (board.wasFirstMount) {
+            this.updateBoard();
+            return;
+        }
+        this.fillBoard();
 
-                boardField.calculateCoordinates(fieldHtml.getAttribute('data-coordinates'));
-                fieldHtml.removeAttribute('data-coordinates');
-                boardField.htmlElement = fieldHtml;
-
-                board.fields[index].push(boardField);
+        board.wasFirstMount = true;
+    },
+    methods: {
+        updateBoard() {
+            this.$refs.board.querySelectorAll('.board-row').forEach((row, i) => {
+                row.querySelectorAll('.board-cell').forEach((fieldHtml, j) => {
+                    fieldHtml.removeAttribute('data-coordinates');
+                    board.fields[i][j].htmlElement = fieldHtml;
+                });
             });
-        });
+
+            board.ships.forEach(ship => {
+                shipPlacementService.defineCustomEvent(null, ship, null);
+                dragDropShipHelper.activeDragForPlacedShip(shipPlacementService.customEvent, ship);
+            });
+        },
+        fillBoard() {
+            this.$refs.board.querySelectorAll('.board-row').forEach((row, index) => {
+                board.fields.push([]);
+                row.querySelectorAll('.board-cell').forEach(fieldHtml => {
+                    const boardField = new BoardField();
+
+                    boardField.calculateCoordinates(fieldHtml.getAttribute('data-coordinates'));
+                    fieldHtml.removeAttribute('data-coordinates');
+                    boardField.htmlElement = fieldHtml;
+
+                    board.fields[index].push(boardField);
+                });
+            });
+        },
     },
 }
 </script>

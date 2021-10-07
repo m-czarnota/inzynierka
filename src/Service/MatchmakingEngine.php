@@ -37,6 +37,7 @@ class MatchmakingEngine
         }
 
         if ($whichApproach === 1) {
+            $matchmakingPosition->setUserGameInfo($userGameInfo);
             $matchmakingPosition->setCreatedAt(new \DateTime());
             $matchmakingPosition->setUpdatedAt(new \DateTime());
 
@@ -44,7 +45,11 @@ class MatchmakingEngine
             $this->em->flush();
         }
 
-        $usersInMatchmaking = $this->matchmakingStorageRepository->findActiveOpponentsInMatchmaking($user);
+        $usersInMatchmaking = [];
+        /** @var MatchmakingStorage $activeMatchmaking */
+        foreach ($this->matchmakingStorageRepository->findActiveMatchmaking($user) as $activeMatchmaking) {
+            $usersInMatchmaking[] = $activeMatchmaking->getUser();
+        }
 
         if (empty($usersInMatchmaking)) {
             return null;
@@ -78,6 +83,10 @@ class MatchmakingEngine
         $game = new Game();
 
         $gameRoom->setLink(bin2hex(random_bytes(5)));
+        $gameRoom->setIsActive(true);
+
+        // TODO concatenate games info from both players into one info
+        $game->setGameInfo([]);
 
         $players = [$user, $opponent];
         $gameRoom->setUsers($players);

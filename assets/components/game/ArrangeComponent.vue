@@ -14,12 +14,13 @@
 <script>
 import ShipsStorageComponent from "./ShipsStorageComponent";
 import Board from "./BoardComponent";
-import {gameRoutes, routeToGame} from "../../loaders/appGame";
 import {shipsStorage} from "../../entities/game/ShipsStorage";
-import GameComponent from "./GameComponent";
 import {gameState} from "../../services/GameState";
 import {board} from "../../entities/game/Board";
 import {shipPlacementService} from "../../services/ShipPlacementService";
+import {dragDropShipHelper} from "../../services/DragDropShipHelper";
+import {gameRouter} from "../../services/GameRouter";
+import {Ship} from "../../entities/game/Ship";
 
 export default {
     name: "ArrangeComponent",
@@ -28,12 +29,13 @@ export default {
         return {
             whichApproach: 0,
             whichSecond: 0,
-            maxSeconds: 3,
+            maxSeconds: 39999,
             countSeconds: null,
         };
     },
     mounted() {
         shipPlacementService.autoPlaceAllShips();
+        dragDropShipHelper.setAppropriateColorForAllFields();
     },
     methods: {
         back() {
@@ -46,7 +48,7 @@ export default {
             }
 
             this.countSeconds = setInterval(() => this.whichSecond++, 1000);
-            document.querySelector('.play-button').setAttribute('disabled', 'true');
+            // document.querySelector('.play-button').setAttribute('disabled', 'true');
             this.prepareGameRequest();
         },
         prepareGameRequest() {
@@ -54,41 +56,37 @@ export default {
 
             const formData = new FormData();
             formData.append('kindOfGame', gameState.kindOfGame);
-            formData.append('playerShips', JSON.stringify(board.ships, board.mapShipBeforeSaving));
+            formData.append('playerShips', shipPlacementService.stringifyShips(board.ships));
             formData.append('whichApproach', this.whichApproach);
 
             const prepareGame = async () => {
                 try {
-                    const response = await fetch(gameRoutes.prepareGame, {
+                    const response = await fetch(gameRouter.gameRoutes.prepareGame, {
                         method: 'POST',
                         body: formData,
+                        redirect: 'follow',
                     });
 
-                    console.log(response);
+                    const data = await response.json();
+
                     if (!response.ok) {
-                        console.error('moj status jest false', response);
+                        console.error(data.message);
                         return null;
                     }
 
-                    console.log('przemieniam', response.message);
-                    const data = await response.json();
-                    console.log('data', data);
-
-                    if (response.status === 204) {
-                        console.log('nie znaleziono, message:', data.message);
+                    if (response.status === 202) {
                         if (this.whichSecond > this.maxSeconds) {
                             this.gameNotFound(data.message);
                             return;
                         }
 
-                        this.prepareGameRequest();
+                        setTimeout(() => this.prepareGameRequest(), 500);
                         return;
                     }
 
                     return data;
                 } catch (error) {
                     console.error(error);
-                    console.error(error.name, error.message);
                 }
 
                 return null;
@@ -100,36 +98,18 @@ export default {
                     return;
                 }
 
-                this.goToPlay(data.linkToRoom);
+                gameRouter.goToPlay(data.linkToRoom);
             })();
         },
-        goToPlay(linkToRoom) {
-            const gameRoomRouteName = 'Match';
 
-            this.$router.getRoutes().forEach(route => {
-                if (!this.$router.hasRoute(route.name) || route.name === gameRoomRouteName || route.name === 'Not Found') {
-                    return;
-                }
-
-                this.$router.removeRoute(route.name);
-            });
-
-            this.$router.addRoute({
-                path: `${routeToGame}/${linkToRoom}`,
-                name: gameRoomRouteName,
-                component: GameComponent,
-            });
-            this.$router.replace({name: gameRoomRouteName});
-
-            gameState.isActiveGame = true;
-        },
         gameNotFound(message) {
             clearInterval(this.countSeconds);
             this.whichSecond = 0;
             this.whichApproach = 0;
+
             console.error(message);
 
-            document.querySelector('.play-button').setAttribute('disabled', 'false');
+            document.querySelector('.play-button').removeAttribute('disabled');
         },
     },
 }

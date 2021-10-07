@@ -24,10 +24,9 @@ class MatchmakingStorageRepository extends ServiceEntityRepository
      * @param User $user
      * @return array
      */
-    public function findActiveOpponentsInMatchmaking(User $user): array
+    public function findActiveMatchmaking(User $user): array
     {
         return $this->createQueryBuilder('s')
-            ->select('IDENTITY(s.user)')
             ->where('s.user != :userId')
             ->andWhere('s.createdAt > :now')
             ->setParameters([
@@ -35,7 +34,7 @@ class MatchmakingStorageRepository extends ServiceEntityRepository
                 'now' => (new \DateTime())->modify('-30 seconds')
             ])
             ->getQuery()
-            ->getArrayResult();
+            ->getResult();
     }
 
     /**
@@ -47,7 +46,7 @@ class MatchmakingStorageRepository extends ServiceEntityRepository
             ->where('s.updatedAt < :time')
             ->setParameter('time', (new \DateTime())->modify('-30 seconds'))
             ->getQuery()
-            ->getArrayResult();
+            ->getResult();
     }
 
     /**
