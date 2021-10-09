@@ -37,6 +37,7 @@ class DragDropShipHelper {
         this.servicedShip.aroundFields.forEach(field => field.unblockField(this.servicedShip));
         this.servicedShip.aroundFields = [];
 
+        this.setAppropriateColorForAllFields();
         this.setDataTransfer(event, shipElements, additionalData);
     }
 
@@ -178,31 +179,35 @@ class DragDropShipHelper {
      */
     placeDraggedShipOnBoard(shipMovingProperty, ship) {
         shipMovingProperty.shipElements.forEach((shipElement, index) => {
-            const coordinatesShip = board.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
             const shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
 
             // base operations
-            shipField.blockField(ship);
             shipField.shipPointer = ship.id;
+            shipField.blockField(ship);
             shipField.numberOfShipElement = index + 1;
             shipField.htmlElement.style.backgroundColor = 'red';
             ship.boardFields.push(shipField);
+        });
 
-            // block around fields
+        // block around fields
+        shipMovingProperty.shipElements.forEach((shipElement, index) => {
+            const coordinatesShip = board.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
             const coordinatesToAroundFields = this.getCoordinatesToAroundFields(coordinatesShip.row, coordinatesShip.column);
+
             coordinatesToAroundFields.forEach(coordinates => {
                 if (!board.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column)) {
                     return;
                 }
 
                 const fieldAroundShip = board.fields[coordinates.row][coordinates.column];
-                if (fieldAroundShip.shipPointer === null && !shipPlacementService.findShipInArray(ship, fieldAroundShip.isNextToShipPointers)) {
-                    // field does not belong to other ship
-                    fieldAroundShip.blockField(ship);
+                fieldAroundShip.blockField(ship);
+                if (!ship.boardFields.find(boardField => boardField.id === fieldAroundShip.id) && !ship.aroundFields.find(field => field.id === fieldAroundShip.id)) {
                     ship.aroundFields.push(fieldAroundShip);
                 }
             });
         });
+
+        this.setAppropriateColorForAllFields();
     }
 
     /**

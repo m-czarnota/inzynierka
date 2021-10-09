@@ -1,6 +1,8 @@
 import {board} from "../entities/game/Board";
 import {shipsStorage} from "../entities/game/ShipsStorage";
 import {dragDropShipHelper} from "./DragDropShipHelper";
+import {Ship} from "../entities/game/Ship";
+import {gameState} from "./GameState";
 
 class ShipPlacementService {
     constructor() {
@@ -79,24 +81,28 @@ class ShipPlacementService {
         } while (!dragDropShipHelper.canPlaceShipOnBoardField(this.customEvent));
 
         dragDropShipHelper.onDrop(this.customEvent);
-    }
 
-    findShipInArray(ship, array) {
-        return array.find(item => item.id === ship.id);
+        gameState.saveInfoToStorage();
     }
 
     stringifyShips(ships) {
+        return JSON.stringify(ships);
+    }
+
+    parseShips(shipsJson) {
+        const parsedShips = JSON.parse(shipsJson);
+        const ships = [];
+
+        parsedShips.forEach(parsedShip => ships.push(Ship.createInstanceFromParsedObject(parsedShip)));
+
+        const setShipForBoardField = (boardField) => {
+            boardField.shipPointer = ships.find(s => s.id === boardField.shipPointer);
+            boardField.isNextToShipPointers.forEach(shipPointer => shipPointer = ships.find(s => s.id === shipPointer));
+        };
+
         ships.forEach(ship => {
-            ship.boardFields.forEach(boardField => boardField.isNextToShipPointers = [...new Set(boardField.isNextToShipPointers)]);
-            ship.aroundFields.forEach(aroundField => aroundField.isNextToShipPointers = [...new Set(aroundField.isNextToShipPointers)]);
-        });
-
-        return JSON.stringify(ships, (key, val) => {
-            if (val instanceof HTMLElement) {
-                return null;
-            }
-
-            return val;
+            ship.boardFields.forEach(boardField => setShipForBoardField(boardField));
+            ship.aroundFields.forEach(aroundField => setShipForBoardField(aroundField));
         });
     }
 }

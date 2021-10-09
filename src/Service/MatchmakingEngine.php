@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\Game;
 use App\Entity\GameRoom;
 use App\Entity\MatchmakingStorage;
@@ -25,11 +26,20 @@ class MatchmakingEngine
 
     /**
      * @param User $user
+     * @param array $userGameInfo
+     * @param int $whichApproach
      * @return User|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function searchOpponent(User $user, array $userGameInfo, int $whichApproach): ?User
     {
         $this->logger->info("Search opponent for {$user->getEmail()} with id {$user->getId()}");
+
+        if (in_array($userGameInfo['kindOfGame'], [KindOfGameEnum::GAME_AI, KindOfGameEnum::GAME_AI_RANKED])) {
+            return $user;
+        }
 
         $matchmakingPosition = $this->matchmakingStorageRepository->findOneMatchmakingByUser($user);
         if (!$matchmakingPosition) {
@@ -37,7 +47,6 @@ class MatchmakingEngine
         }
 
         if ($whichApproach === 1) {
-            $matchmakingPosition->setUserGameInfo($userGameInfo);
             $matchmakingPosition->setCreatedAt(new \DateTime());
             $matchmakingPosition->setUpdatedAt(new \DateTime());
 
@@ -47,7 +56,7 @@ class MatchmakingEngine
 
         $usersInMatchmaking = [];
         /** @var MatchmakingStorage $activeMatchmaking */
-        foreach ($this->matchmakingStorageRepository->findActiveMatchmaking($user) as $activeMatchmaking) {
+        foreach ($this->matchmakingStorageRepository->findActiveMatchmakingForUserByKindOfGame($user, $userGameInfo['kindOfGame']) as $activeMatchmaking) {
             $usersInMatchmaking[] = $activeMatchmaking->getUser();
         }
 
@@ -85,8 +94,12 @@ class MatchmakingEngine
         $gameRoom->setLink(bin2hex(random_bytes(5)));
         $gameRoom->setIsActive(true);
 
-        // TODO concatenate games info from both players into one info
-        $game->setGameInfo([]);
+        $userInMatchmaking = $this->matchmakingStorageRepository->findOneMatchmakingByUser($user);
+        $game->setGameInfo([
+            $userInMatchmaking->getShips(),
+            $this->matchmakingStorageRepository->findOneMatchmakingByUser($opponent)->getShips()
+        ]);
+        $game->setKindOfGame($userInMatchmaking->getKindOfGame());
 
         $players = [$user, $opponent];
         $gameRoom->setUsers($players);
@@ -129,7 +142,8 @@ class MatchmakingEngine
     {
         $matchmakingStorage = new MatchmakingStorage();
         $matchmakingStorage->setUser($user);
-        $matchmakingStorage->setUserGameInfo($userGameInfo);
+        $matchmakingStorage->setShips($userGameInfo['ships']);
+        $matchmakingStorage->setKindOfGame($userGameInfo['kindOfGame']);
 
         $this->em->persist($matchmakingStorage);
         $this->em->flush();

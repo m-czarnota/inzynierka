@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import {shipsStorage} from "../entities/game/ShipsStorage";
 import {board} from "../entities/game/Board";
 import {shipPlacementService} from "./ShipPlacementService";
@@ -7,26 +6,27 @@ class GameState {
     constructor() {
         this.isActiveGame = false;
         this.kindOfGame = null;
+        this.gameInfoStorageKey = 'gameInfo';
 
-        this.loadFromCookies();
+        this.loadFromStorage();
     }
 
-    loadFromCookies() {
-        if (!Cookies.get('gameInfo')) {
+    loadFromStorage() {
+        const gameInfoStorage = localStorage.getItem(this.gameInfoStorageKey);
+        if (!gameInfoStorage) {
             return;
         }
 
-        const gameInfo = JSON.parse(Cookies.get('gameInfo'));
+        const gameInfo = JSON.parse(gameInfoStorage);
+        console.log(gameInfo);
+        console.log(JSON.parse(gameInfo.board.ships));
         this.kindOfGame = gameInfo.kindOfGame;
         // board.ships = JSON.parse(gameInfo.board.ships);
         // shipsStorage.ships = JSON.parse(gameInfo.shipsStorage.ships);
-
-        // renew Cookie life
-        this.saveInfoToCookies();
     }
 
-    saveInfoToCookies() {
-        Cookies.set('gameInfo', JSON.stringify({
+    saveInfoToStorage() {
+        localStorage.setItem(this.gameInfoStorageKey, JSON.stringify({
             kindOfGame: this.kindOfGame,
             board: {
                 ships: shipPlacementService.stringifyShips(board.ships),
@@ -34,8 +34,6 @@ class GameState {
             shipsStorage: {
                 ships: shipPlacementService.stringifyShips(shipsStorage.ships),
             }
-        }, {
-            expires: 1,
         }));
     }
 }

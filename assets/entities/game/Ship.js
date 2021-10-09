@@ -1,3 +1,5 @@
+import {board} from "./Board";
+
 const $ = require("jquery");
 
 let id = 0;
@@ -59,5 +61,34 @@ export class Ship {
         if (this.actualPose < 0) {
             this.actualPose = 0;
         }
+    }
+
+    static createInstanceFromParsedObject(parsedShip) {
+        const getParsedBoardField = parsedBoardField => {
+            const boardField = board.getFieldByCoordinates(parsedBoardField.coordinates);
+            boardField.numberOfShipElement = parsedBoardField.numberOfShipElement;
+            boardField.isHit = parsedBoardField.isHit;
+            boardField.isActive = parsedBoardField.isActive;
+
+            return boardField;
+        };
+
+        const ship = new Ship();
+
+        ship.id = parsedShip.id;
+        ship.elementsCount = parsedShip.elementsCount;
+        ship.elementsGridProperties = parsedShip.elementsGridProperties;
+        parsedShip.boardFields.forEach(boardField => ship.boardFields.push(getParsedBoardField(boardField)));
+        parsedShip.aroundFields.forEach(aroundField => ship.aroundFields.push(getParsedBoardField(aroundField)));
+        ship.hitElements = parsedShip.hitElements;
+        ship.htmlElements = parsedShip.htmlElements;  // to fix
+        ship.fieldsParent = parsedShip.fieldsParent;
+        ship.poses = parsedShip.poses;
+        ship.actualPose = parsedShip.actualPose;
+        ship.wasFirstRotate = parsedShip.wasFirstRotate;
+
+        ship.timeToRestoreShipOnLastPosition = parsedShip.timeToRestoreShipOnLastPosition;
+
+        return ship;
     }
 }

@@ -20,7 +20,6 @@ import {board} from "../../entities/game/Board";
 import {shipPlacementService} from "../../services/ShipPlacementService";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameRouter} from "../../services/GameRouter";
-import {Ship} from "../../entities/game/Ship";
 
 export default {
     name: "ArrangeComponent",
@@ -34,8 +33,11 @@ export default {
         };
     },
     mounted() {
-        shipPlacementService.autoPlaceAllShips();
-        dragDropShipHelper.setAppropriateColorForAllFields();
+        if (board.ships.length === 0) {
+            shipPlacementService.autoPlaceAllShips();
+            dragDropShipHelper.setAppropriateColorForAllFields();
+        }
+        console.log(board.ships);
     },
     methods: {
         back() {

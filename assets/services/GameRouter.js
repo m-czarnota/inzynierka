@@ -82,8 +82,12 @@ class GameRouter {
         const data = await response.json();
 
         if (data.status) {
+            localStorage.removeItem(gameState.gameInfoStorageKey);
             this.goToPlay(data.linkToRoom);
+            return;
         }
+
+        gameState.loadFromStorage();
     }
 }
 

@@ -57,7 +57,7 @@ export default {
             }
 
             gameState.kindOfGame = this.chosenOption;
-            gameState.saveInfoToCookies();
+            gameState.saveInfoToStorage();
         },
         choiceIsValid() {
             return Object.values(this.kindsOfGame).includes(this.chosenOption);

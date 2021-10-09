@@ -37,6 +37,21 @@ class MatchmakingStorageRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findActiveMatchmakingForUserByKindOfGame(User $user, int $kindOfGame): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.user != :userId')
+            ->andWhere('s.kindOfGame = :kindOfGame')
+            ->andWhere('s.createdAt > :now')
+            ->setParameters([
+                'userId' => $user->getId(),
+                'kindOfGame' => $kindOfGame,
+                'now' => (new \DateTime())->modify('-30 seconds')
+            ])
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * @return array
      */

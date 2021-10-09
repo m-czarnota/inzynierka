@@ -1,4 +1,4 @@
-import {Ship} from "./Ship";
+import {BoardField} from "./BoardField";
 
 class Board {
     constructor() {
@@ -45,6 +45,16 @@ class Board {
 
         return this.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column) ?
             this.fields[coordinates.row][coordinates.column] : null;
+    }
+
+    getFieldByCoordinates(coordinates) {
+        const letter = coordinates.charAt(0).toUpperCase();
+        const number = coordinates.slice(1);
+
+        const row = letter.charCodeAt(0) - BoardField.startCoordinatesLetter.charCodeAt(0);
+        const column = parseInt(number) - 1;
+
+        return this.fields[row][column];
     }
 }
 
