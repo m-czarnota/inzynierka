@@ -24,6 +24,11 @@ class ShipsStorage {
             }
         });
     }
+
+    remove() {
+        this.ships.forEach(ship => ship.remove());
+        delete this;
+    }
 }
 
 export const shipsStorage = new ShipsStorage();

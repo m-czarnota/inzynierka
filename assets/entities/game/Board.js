@@ -1,6 +1,9 @@
-class Board {
+import {BoardField} from "./BoardField";
+
+export class Board {
     constructor() {
         this.size = 10;
+        this.wasFirstMount = false;
         this.ships = [];
         this.fields = [];
     }
@@ -42,6 +45,26 @@ class Board {
 
         return this.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column) ?
             this.fields[coordinates.row][coordinates.column] : null;
+    }
+
+    getFieldByCoordinates(coordinates) {
+        const letter = coordinates.charAt(0).toUpperCase();
+        const number = coordinates.slice(1);
+
+        const row = letter.charCodeAt(0) - BoardField.startCoordinatesLetter.charCodeAt(0);
+        const column = parseInt(number) - 1;
+
+        return this.fields[row][column];
+    }
+
+    remove() {
+        this.fields.forEach(row => {
+            row.forEach(field => field.remove());
+            row = null;
+        });
+        this.ships.forEach(ship => ship.remove());
+
+        delete this;
     }
 }
 

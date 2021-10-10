@@ -2,6 +2,7 @@ let id = 0;
 
 export class BoardField {
     static gridSize = null;
+    static startCoordinatesLetter = 'A';
 
     constructor() {
         this.id = id++;
@@ -18,7 +19,7 @@ export class BoardField {
         this.coordinates = coordinates ?? this.coordinates;
 
         const center = Math.floor(this.coordinates.length / 2);
-        let char = parseInt(this.coordinates.substring(0, center)) + 'A'.charCodeAt(0);
+        let char = parseInt(this.coordinates.substring(0, center)) + BoardField.startCoordinatesLetter.charCodeAt(0) - 1;
         let number = this.coordinates.substring(center);
 
         if (number.length === 2 && number[0] === '0') {
@@ -31,7 +32,9 @@ export class BoardField {
 
     blockField(shipPointer) {
         this.isActive = false;
-        this.isNextToShipPointers.push(shipPointer);
+        if (this.shipPointer === null && !this.isNextToShipPointers.includes(shipPointer.id)) {
+            this.isNextToShipPointers.push(shipPointer.id);
+        }
 
         // TODO better styles assign
         this.htmlElement.style.backgroundColor = 'grey';
@@ -40,7 +43,7 @@ export class BoardField {
 
     unblockField(shipPointer) {
         this.shipPointer = null;
-        this.isNextToShipPointers.splice(this.isNextToShipPointers.indexOf(shipPointer), 1);
+        this.isNextToShipPointers.splice(this.isNextToShipPointers.indexOf(shipPointer.id), 1);
 
         this.numberOfShipElement = -1;
         this.htmlElement.removeAttribute('draggable');
@@ -50,5 +53,9 @@ export class BoardField {
             this.htmlElement.style.backgroundColor = '';
             this.htmlElement.style.cursor = '';
         }
+    }
+
+    remove() {
+        delete this;
     }
 }

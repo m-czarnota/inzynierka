@@ -28,9 +28,20 @@ class MatchmakingStorage
     private User $user;
 
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private int $kindOfGame;
+
+    /**
      * @ORM\Column(type="json")
      */
-    private array $userGameInfo = [];
+    private array $ships = [];
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     public function getId(): int
     {
@@ -49,13 +60,29 @@ class MatchmakingStorage
         return $this;
     }
 
-    public function getUserGameInfo(): array
+    /**
+     * @return array
+     */
+    public function getShips(): array
     {
-        return $this->userGameInfo;
+        return $this->ships;
     }
 
-    public function setUserGameInfo(array $userGameInfo): void
+    /**
+     * @param array $ships
+     */
+    public function setShips(array $ships): void
     {
-        $this->userGameInfo = $userGameInfo;
+        $this->ships = $ships;
+    }
+
+    public function getKindOfGame(): int
+    {
+        return $this->kindOfGame;
+    }
+
+    public function setKindOfGame(int $kindOfGame): void
+    {
+        $this->kindOfGame = $kindOfGame;
     }
 }

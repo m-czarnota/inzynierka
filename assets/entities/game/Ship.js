@@ -1,3 +1,5 @@
+import {board} from "./Board";
+
 const $ = require("jquery");
 
 let id = 0;
@@ -12,6 +14,7 @@ export class Ship {
         this.boardFields = [];
         this.aroundFields = [];
         this.hitElements = [];
+        this.htmlElements = null;
         this.fieldsParent = null;
         this.poses = [];
         this.actualPose = 0;
@@ -21,12 +24,11 @@ export class Ship {
         this.timeToRestoreShipOnLastPosition = 1000;
     }
 
-    rotate(event) {
-        const target = event instanceof HTMLElement ? event : event.target.previousSibling;
+    rotate() {
         this.elementsGridProperties = [];
         this.wasFirstRotate = true;
 
-        $(target).children().each((index, element) => {
+        $(this.htmlElements).children().each((index, element) => {
             $(element).css(this.poses[this.actualPose][index]);
             this.elementsGridProperties.push({
                 column: $(element).css('gridColumnStart'),
@@ -35,7 +37,7 @@ export class Ship {
         });
 
         this.actualPoseIncrement();
-        this.cloneNode(target);
+        this.cloneNode(this.htmlElements);
     }
 
     cloneNode(node) {
@@ -59,5 +61,41 @@ export class Ship {
         if (this.actualPose < 0) {
             this.actualPose = 0;
         }
+    }
+
+    static createInstanceFromParsedObject(parsedShip, board) {
+        const getParsedBoardField = parsedBoardField => {
+            const boardField = board.getFieldByCoordinates(parsedBoardField.coordinates);
+            boardField.shipPointer = parsedBoardField.shipPointer;
+            boardField.numberOfShipElement = parsedBoardField.numberOfShipElement;
+            boardField.isNextToShipPointers = parsedBoardField.isNextToShipPointers;
+            boardField.isHit = parsedBoardField.isHit;
+            boardField.isActive = parsedBoardField.isActive;
+
+            return boardField;
+        };
+
+        const ship = new Ship();
+
+        ship.id = parsedShip.id;
+        ship.elementsCount = parsedShip.elementsCount;
+        ship.elementsGridProperties = parsedShip.elementsGridProperties;
+        parsedShip.boardFields.forEach(boardField => ship.boardFields.push(getParsedBoardField(boardField)));
+        parsedShip.aroundFields.forEach(aroundField => ship.aroundFields.push(getParsedBoardField(aroundField)));
+        ship.hitElements = parsedShip.hitElements;
+        ship.fieldsParent = parsedShip.fieldsParent;
+        ship.poses = parsedShip.poses;
+        ship.actualPose = parsedShip.actualPose;
+        ship.wasFirstRotate = parsedShip.wasFirstRotate;
+
+        ship.timeToRestoreShipOnLastPosition = parsedShip.timeToRestoreShipOnLastPosition;
+
+        return ship;
+    }
+
+    remove() {
+        this.aroundFields.forEach(field => field.remove());
+        this.boardFields.forEach(field => field.remove());
+        delete this;
     }
 }

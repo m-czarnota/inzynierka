@@ -2,21 +2,22 @@
 
 namespace App\Service;
 
+use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\Game;
 use App\Entity\GameRoom;
 use App\Entity\MatchmakingStorage;
 use App\Entity\User;
 use App\Repository\MatchmakingStorageRepository;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\HttpKernel\Log\Logger;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class MatchmakingEngine
 {
     private MatchmakingStorageRepository $matchmakingStorageRepository;
-    private EntityManager $em;
-    private Logger $logger;
+    private EntityManagerInterface $em;
+    private LoggerInterface $logger;
 
-    public function __construct(Logger $logger, MatchmakingStorageRepository $matchmakingStorageRepository, EntityManager $em)
+    public function __construct(LoggerInterface $logger, MatchmakingStorageRepository $matchmakingStorageRepository, EntityManagerInterface $em)
     {
         $this->logger = $logger;
         $this->matchmakingStorageRepository = $matchmakingStorageRepository;
@@ -25,26 +26,41 @@ class MatchmakingEngine
 
     /**
      * @param User $user
+     * @param array $userGameInfo
+     * @param int $whichApproach
      * @return User|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function searchOpponent(User $user, array $userGameInfo): ?User
+    public function searchOpponent(User $user, array $userGameInfo, int $whichApproach): ?User
     {
         $this->logger->info("Search opponent for {$user->getEmail()} with id {$user->getId()}");
+
+        if (in_array($userGameInfo['kindOfGame'], [KindOfGameEnum::GAME_AI, KindOfGameEnum::GAME_AI_RANKED])) {
+            return $user;
+        }
 
         $matchmakingPosition = $this->matchmakingStorageRepository->findOneMatchmakingByUser($user);
         if (!$matchmakingPosition) {
             $matchmakingPosition = $this->createMatchmakingPosition($user, $userGameInfo);
         }
 
-        if ($matchmakingPosition->getUpdatedAt() < (new \DateTime())->modify('-30 seconds')) {
-            $this->em->remove($matchmakingPosition);
-            $this->em->flush();
-            $this->em->refresh($this->matchmakingStorageRepository);
+        if ($whichApproach === 1) {
+            $matchmakingPosition->setShips(json_decode($userGameInfo['ships']));
+            $matchmakingPosition->setKindOfGame($userGameInfo['kindOfGame']);
+            $matchmakingPosition->setCreatedAt(new \DateTime());
+            $matchmakingPosition->setUpdatedAt(new \DateTime());
 
-            $this->createMatchmakingPosition($user, $userGameInfo);
+            $this->em->persist($matchmakingPosition);
+            $this->em->flush();
         }
 
-        $usersInMatchmaking = $this->matchmakingStorageRepository->findUsersInMatchmakingWithoutOne($user);
+        $usersInMatchmaking = [];
+        /** @var MatchmakingStorage $activeMatchmaking */
+        foreach ($this->matchmakingStorageRepository->findActiveMatchmakingForUserByKindOfGame($user, $userGameInfo['kindOfGame']) as $activeMatchmaking) {
+            $usersInMatchmaking[] = $activeMatchmaking->getUser();
+        }
 
         if (empty($usersInMatchmaking)) {
             return null;
@@ -78,6 +94,14 @@ class MatchmakingEngine
         $game = new Game();
 
         $gameRoom->setLink(bin2hex(random_bytes(5)));
+        $gameRoom->setIsActive(true);
+
+        $userInMatchmaking = $this->matchmakingStorageRepository->findOneMatchmakingByUser($user);
+        $game->setGameInfo([
+            $userInMatchmaking->getShips(),
+            $this->matchmakingStorageRepository->findOneMatchmakingByUser($opponent)->getShips()
+        ]);
+        $game->setKindOfGame($userInMatchmaking->getKindOfGame());
 
         $players = [$user, $opponent];
         $gameRoom->setUsers($players);
@@ -120,11 +144,11 @@ class MatchmakingEngine
     {
         $matchmakingStorage = new MatchmakingStorage();
         $matchmakingStorage->setUser($user);
-        $matchmakingStorage->setUserGameInfo($userGameInfo);
+        $matchmakingStorage->setShips(json_decode($userGameInfo['ships']));
+        $matchmakingStorage->setKindOfGame($userGameInfo['kindOfGame']);
 
         $this->em->persist($matchmakingStorage);
         $this->em->flush();
-        $this->em->refresh($this->matchmakingStorageRepository);
 
         return $matchmakingStorage;
     }
@@ -144,7 +168,6 @@ class MatchmakingEngine
 
             $this->em->remove($matchmakingUserPosition);
             $this->em->flush();
-            $this->em->refresh($this->matchmakingStorageRepository);
         }
     }
 

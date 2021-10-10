@@ -11,7 +11,7 @@
                                 numberOfShipSelectedElement: n
                             })"></field-component>
         </div>
-        <button @click="ship.rotate($event)" v-if="ship.elementsCount > 1">Rotate</button>
+        <button @click="ship.rotate()" v-if="ship.elementsCount > 1">Rotate</button>
     </div>
 </template>
 
@@ -34,7 +34,6 @@ export default {
         }
     },
     props: ['elementsCountProp', 'ship'],
-    methods: {},
     mounted() {
         const shipNode = this.$refs.x;
         const shipElementSize = shipNode.querySelector('.board-cell').offsetWidth;
@@ -55,7 +54,8 @@ export default {
             this.ship.actualPoseDecrement();
         }
 
-        this.ship.rotate(shipNode);
+        this.ship.htmlElements = shipNode;
+        this.ship.rotate();
     },
 }
 </script>
