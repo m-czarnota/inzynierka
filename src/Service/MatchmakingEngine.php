@@ -47,6 +47,8 @@ class MatchmakingEngine
         }
 
         if ($whichApproach === 1) {
+            $matchmakingPosition->setShips(json_decode($userGameInfo['ships']));
+            $matchmakingPosition->setKindOfGame($userGameInfo['kindOfGame']);
             $matchmakingPosition->setCreatedAt(new \DateTime());
             $matchmakingPosition->setUpdatedAt(new \DateTime());
 
@@ -142,7 +144,7 @@ class MatchmakingEngine
     {
         $matchmakingStorage = new MatchmakingStorage();
         $matchmakingStorage->setUser($user);
-        $matchmakingStorage->setShips($userGameInfo['ships']);
+        $matchmakingStorage->setShips(json_decode($userGameInfo['ships']));
         $matchmakingStorage->setKindOfGame($userGameInfo['kindOfGame']);
 
         $this->em->persist($matchmakingStorage);

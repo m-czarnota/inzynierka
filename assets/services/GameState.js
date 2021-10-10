@@ -18,8 +18,6 @@ class GameState {
         }
 
         const gameInfo = JSON.parse(gameInfoStorage);
-        console.log(gameInfo);
-        console.log(JSON.parse(gameInfo.board.ships));
         this.kindOfGame = gameInfo.kindOfGame;
         // board.ships = JSON.parse(gameInfo.board.ships);
         // shipsStorage.ships = JSON.parse(gameInfo.shipsStorage.ships);

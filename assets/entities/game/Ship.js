@@ -63,10 +63,12 @@ export class Ship {
         }
     }
 
-    static createInstanceFromParsedObject(parsedShip) {
+    static createInstanceFromParsedObject(parsedShip, board) {
         const getParsedBoardField = parsedBoardField => {
             const boardField = board.getFieldByCoordinates(parsedBoardField.coordinates);
+            boardField.shipPointer = parsedBoardField.shipPointer;
             boardField.numberOfShipElement = parsedBoardField.numberOfShipElement;
+            boardField.isNextToShipPointers = parsedBoardField.isNextToShipPointers;
             boardField.isHit = parsedBoardField.isHit;
             boardField.isActive = parsedBoardField.isActive;
 
@@ -81,7 +83,6 @@ export class Ship {
         parsedShip.boardFields.forEach(boardField => ship.boardFields.push(getParsedBoardField(boardField)));
         parsedShip.aroundFields.forEach(aroundField => ship.aroundFields.push(getParsedBoardField(aroundField)));
         ship.hitElements = parsedShip.hitElements;
-        ship.htmlElements = parsedShip.htmlElements;  // to fix
         ship.fieldsParent = parsedShip.fieldsParent;
         ship.poses = parsedShip.poses;
         ship.actualPose = parsedShip.actualPose;
@@ -90,5 +91,11 @@ export class Ship {
         ship.timeToRestoreShipOnLastPosition = parsedShip.timeToRestoreShipOnLastPosition;
 
         return ship;
+    }
+
+    remove() {
+        this.aroundFields.forEach(field => field.remove());
+        this.boardFields.forEach(field => field.remove());
+        delete this;
     }
 }

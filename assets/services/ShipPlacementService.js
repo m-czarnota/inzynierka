@@ -95,15 +95,7 @@ class ShipPlacementService {
 
         parsedShips.forEach(parsedShip => ships.push(Ship.createInstanceFromParsedObject(parsedShip)));
 
-        const setShipForBoardField = (boardField) => {
-            boardField.shipPointer = ships.find(s => s.id === boardField.shipPointer);
-            boardField.isNextToShipPointers.forEach(shipPointer => shipPointer = ships.find(s => s.id === shipPointer));
-        };
-
-        ships.forEach(ship => {
-            ship.boardFields.forEach(boardField => setShipForBoardField(boardField));
-            ship.aroundFields.forEach(aroundField => setShipForBoardField(aroundField));
-        });
+        return ships;
     }
 }
 

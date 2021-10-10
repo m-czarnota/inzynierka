@@ -7,6 +7,7 @@ import {shipPlacementService} from "./ShipPlacementService";
 
 class DragDropShipHelper {
     constructor() {
+        this.board = board;
         this.numberOfShipSelectedElement = -1;
         this.shipElements = [];
         this.selectedShipElement = null;
@@ -138,12 +139,12 @@ class DragDropShipHelper {
         }
 
         const shipId = parseInt(event.dataTransfer.getData('shipId'));
-        let ship = board.findShipById(shipId);
+        let ship = this.board.findShipById(shipId);
 
         // ship is coming from storage
         if (!ship) {
             ship = shipsStorage.ships.find(shipToFind => shipToFind.id === shipId);
-            board.ships.push(ship);
+            this.board.ships.push(ship);
             shipsStorage.ships.splice(shipsStorage.ships.indexOf(ship), 1);
         }
 
@@ -179,7 +180,7 @@ class DragDropShipHelper {
      */
     placeDraggedShipOnBoard(shipMovingProperty, ship) {
         shipMovingProperty.shipElements.forEach((shipElement, index) => {
-            const shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
+            const shipField = this.board.getFieldForShipElement(shipMovingProperty, shipElement);
 
             // base operations
             shipField.shipPointer = ship.id;
@@ -191,15 +192,15 @@ class DragDropShipHelper {
 
         // block around fields
         shipMovingProperty.shipElements.forEach((shipElement, index) => {
-            const coordinatesShip = board.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
+            const coordinatesShip = this.board.calculateCoordinatesFieldForShipElement(shipMovingProperty, shipElement);
             const coordinatesToAroundFields = this.getCoordinatesToAroundFields(coordinatesShip.row, coordinatesShip.column);
 
             coordinatesToAroundFields.forEach(coordinates => {
-                if (!board.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column)) {
+                if (!this.board.checkIfCoordinatesAreInBoardBoundary(coordinates.row, coordinates.column)) {
                     return;
                 }
 
-                const fieldAroundShip = board.fields[coordinates.row][coordinates.column];
+                const fieldAroundShip = this.board.fields[coordinates.row][coordinates.column];
                 fieldAroundShip.blockField(ship);
                 if (!ship.boardFields.find(boardField => boardField.id === fieldAroundShip.id) && !ship.aroundFields.find(field => field.id === fieldAroundShip.id)) {
                     ship.aroundFields.push(fieldAroundShip);
@@ -227,7 +228,7 @@ class DragDropShipHelper {
                         value: ship.boardFields[this.getDataTransfer(event).numberOfShipSelectedElement - 1].htmlElement
                     });
 
-                    if (board.findShipById(ship.id)) {
+                    if (this.board.findShipById(ship.id)) {
                         this.onDrop(event);
                     }
                 }, ship.timeToRestoreShipOnLastPosition);
@@ -279,7 +280,7 @@ class DragDropShipHelper {
      */
     setAppropriateColorForAllFields() {
         // TODO better colors
-        for (let field of board.fields.flat()) {
+        for (let field of this.board.fields.flat()) {
             if (field.shipPointer !== null) {
                 field.htmlElement.style.backgroundColor = 'red';
             } else if (field.isNextToShipPointers.length) {
@@ -291,7 +292,7 @@ class DragDropShipHelper {
     }
 
     canPlaceShipOnBoardField(event) {
-        for (let [index, field] of board.fields.flat().entries()) {
+        for (let [index, field] of this.board.fields.flat().entries()) {
             if (event.target !== field.htmlElement) {
                 continue;
             }
@@ -302,7 +303,7 @@ class DragDropShipHelper {
             }
 
             for (let shipElement of shipMovingProperty.shipElements) {
-                const shipField = board.getFieldForShipElement(shipMovingProperty, shipElement);
+                const shipField = this.board.getFieldForShipElement(shipMovingProperty, shipElement);
 
                 if (!shipField.isActive) {
                     return false;
@@ -330,7 +331,7 @@ class DragDropShipHelper {
         const shipMovingProperty = this.targetsInBoardBoundary(event);
         if (shipMovingProperty) {
             shipMovingProperty.shipElements.forEach((shipElement) => {
-                const boardField = board.getFieldForShipElement(shipMovingProperty, shipElement);
+                const boardField = this.board.getFieldForShipElement(shipMovingProperty, shipElement);
 
                 if (boardField.isActive) {
                     boardField.htmlElement.style.backgroundColor = addColor ? color : '';
@@ -348,15 +349,15 @@ class DragDropShipHelper {
         const shipSelectedElement = dataTransfer.shipElements[dataTransfer.numberOfShipSelectedElement - 1];
 
         const targetCoordinates = (() => {
-            for (let [index, field] of board.fields.flat().entries()) {
+            for (let [index, field] of this.board.fields.flat().entries()) {
                 if (event.target === field.htmlElement) {
-                    return board.calculateFieldPositionFromIndex(index);
+                    return this.board.calculateFieldPositionFromIndex(index);
                 }
             }
         })();
 
         for (let shipElementGridValues of dataTransfer.shipElements) {
-            if (!board.getFieldForShipElement(
+            if (!this.board.getFieldForShipElement(
                 {targetCoordinates: targetCoordinates, shipSelectedElement: shipSelectedElement},
                 shipElementGridValues
             )) {

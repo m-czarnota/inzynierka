@@ -1,6 +1,6 @@
 <template>
     <div class="board"
-         ref="board"
+         ref="boardRef"
          :class="{ 'col-6': $router.currentRoute.value.name === 'Arrange Ships' }">
         <div v-for="n in size" class="board-row">
             <field-component v-for="k in size" :data-coordinates="n + '' + k"
@@ -26,35 +26,40 @@ export default {
         return {
             size: 10,
             dragDropShipHelper: dragDropShipHelper,
-            board: board,
         };
     },
+    props: ['board'],
     mounted() {
-        if (board.wasFirstMount) {
+        if (this.board.wasFirstMount) {
             this.updateBoard();
             return;
         }
         this.fillBoard();
 
-        board.wasFirstMount = true;
+        this.board.wasFirstMount = true;
+    },
+    setup(props) {
+        return {
+            board: props.board ?? board,
+        };
     },
     methods: {
         updateBoard() {
-            this.$refs.board.querySelectorAll('.board-row').forEach((row, i) => {
+            this.$refs.boardRef.querySelectorAll('.board-row').forEach((row, i) => {
                 row.querySelectorAll('.board-cell').forEach((fieldHtml, j) => {
                     fieldHtml.removeAttribute('data-coordinates');
-                    board.fields[i][j].htmlElement = fieldHtml;
+                    this.board.fields[i][j].htmlElement = fieldHtml;
                 });
             });
 
-            board.ships.forEach(ship => {
+            this.board.ships.forEach(ship => {
                 shipPlacementService.defineCustomEvent(null, ship, null);
                 dragDropShipHelper.activeDragForPlacedShip(shipPlacementService.customEvent, ship);
             });
         },
         fillBoard() {
-            this.$refs.board.querySelectorAll('.board-row').forEach((row, index) => {
-                board.fields.push([]);
+            this.$refs.boardRef.querySelectorAll('.board-row').forEach((row, index) => {
+                this.board.fields.push([]);
                 row.querySelectorAll('.board-cell').forEach(fieldHtml => {
                     const boardField = new BoardField();
 
@@ -62,7 +67,7 @@ export default {
                     fieldHtml.removeAttribute('data-coordinates');
                     boardField.htmlElement = fieldHtml;
 
-                    board.fields[index].push(boardField);
+                    this.board.fields[index].push(boardField);
                 });
             });
         },

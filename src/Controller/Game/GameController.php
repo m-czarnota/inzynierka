@@ -3,10 +3,9 @@
 namespace App\Controller\Game;
 
 use App\Entity\Enums\KindOfGameEnum;
-use App\Entity\Game;
-use App\Entity\GameRoom;
 use App\Entity\User;
 use App\Service\MatchmakingEngine;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,6 +73,19 @@ class GameController extends AbstractController
             'status' => $isUserInGame,
             'linkToRoom' => $isUserInGame ? $user->getGameRoom()->getLink() : null,
         ]);
+    }
+
+    /**
+     * @Route(path="/getUserShips", name="get_user_ships")
+     */
+    public function getUserShips(EntityManagerInterface $em): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $gameShips = $user->getGame()->getGameInfo();
+        $userShips = $gameShips[array_search($user, $user->getGame()->getUsers())];
+
+        return new JsonResponse($userShips);
     }
 
     /**

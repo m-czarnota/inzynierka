@@ -54,4 +54,8 @@ export class BoardField {
             this.htmlElement.style.cursor = '';
         }
     }
+
+    remove() {
+        delete this;
+    }
 }

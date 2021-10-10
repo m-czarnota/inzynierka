@@ -2,7 +2,7 @@
     <div class="arrange-component">
         <main class="arrange-main">
             <ships-storage-component></ships-storage-component>
-            <board></board>
+            <board-component></board-component>
         </main>
         <div class="buttons d-flex justify-content-around mt-5">
             <button type="button" class="btn btn-secondary back-button" @click="back">Back</button>
@@ -13,7 +13,7 @@
 
 <script>
 import ShipsStorageComponent from "./ShipsStorageComponent";
-import Board from "./BoardComponent";
+import BoardComponent from "./BoardComponent";
 import {shipsStorage} from "../../entities/game/ShipsStorage";
 import {gameState} from "../../services/GameState";
 import {board} from "../../entities/game/Board";
@@ -23,7 +23,7 @@ import {gameRouter} from "../../services/GameRouter";
 
 export default {
     name: "ArrangeComponent",
-    components: {Board, ShipsStorageComponent},
+    components: {BoardComponent, ShipsStorageComponent},
     data() {
         return {
             whichApproach: 0,
@@ -37,7 +37,6 @@ export default {
             shipPlacementService.autoPlaceAllShips();
             dragDropShipHelper.setAppropriateColorForAllFields();
         }
-        console.log(board.ships);
     },
     methods: {
         back() {
@@ -101,6 +100,9 @@ export default {
                 }
 
                 gameRouter.goToPlay(data.linkToRoom);
+
+                shipsStorage.remove();
+                board.remove();
             })();
         },
 

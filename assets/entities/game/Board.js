@@ -1,6 +1,6 @@
 import {BoardField} from "./BoardField";
 
-class Board {
+export class Board {
     constructor() {
         this.size = 10;
         this.wasFirstMount = false;
@@ -55,6 +55,16 @@ class Board {
         const column = parseInt(number) - 1;
 
         return this.fields[row][column];
+    }
+
+    remove() {
+        this.fields.forEach(row => {
+            row.forEach(field => field.remove());
+            row = null;
+        });
+        this.ships.forEach(ship => ship.remove());
+
+        delete this;
     }
 }
 
