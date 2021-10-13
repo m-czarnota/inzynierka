@@ -47,6 +47,12 @@ class Game
     private int $gameState;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @var int
+     */
+    private int $playerTurn;
+
+    /**
      * @ORM\Column(type="json")
      */
     private $gameInfo = [];
@@ -121,6 +127,22 @@ class Game
         $this->gameInfo = $gameInfo;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPlayerTurn(): int
+    {
+        return $this->playerTurn;
+    }
+
+    /**
+     * @param int $playerTurn
+     */
+    public function setPlayerTurn(int $playerTurn): void
+    {
+        $this->playerTurn = $playerTurn;
     }
 
 

@@ -24,7 +24,7 @@ class GameController extends AbstractController
      * @return JsonResponse
      * @throws \Exception
      */
-    public function prepareGame(MatchmakingEngine $matchmakingEngine, Request $request): JsonResponse
+    public function prepareGameAction(MatchmakingEngine $matchmakingEngine, Request $request): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -63,7 +63,7 @@ class GameController extends AbstractController
     /**
      * @Route (path="/isUserInGame", name="is_user_in_game")
      */
-    public function isUserInGame(): JsonResponse
+    public function checkIfIsUserInGameAction(): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -78,14 +78,31 @@ class GameController extends AbstractController
     /**
      * @Route(path="/getUserShips", name="get_user_ships")
      */
-    public function getUserShips(EntityManagerInterface $em): JsonResponse
+    public function getUserShipsAction(EntityManagerInterface $em): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
-        $gameShips = $user->getGame()->getGameInfo();
-        $userShips = $gameShips[array_search($user, $user->getGame()->getUsers())];
+        $game = $user->getGame();
 
-        return new JsonResponse($userShips);
+        $turnFlag = array_search($user, $game->getUsers());
+        $gameShips = $user->getGame()->getGameInfo();
+        $userShips = $gameShips[$turnFlag];
+
+        return new JsonResponse([
+            'ships' => $userShips,
+            'turnFlag' => $turnFlag,
+            'playerTurn' => $turnFlag === $game->getPlayerTurn(),
+        ]);
+    }
+
+    public function servePlayerInGameAction(EntityManagerInterface $em, Request $request): JsonResponse
+    {
+
+
+        return new JsonResponse([
+            'status' => 'no_changed',
+            'message' => "Waiting for action",
+        ]);
     }
 
     /**

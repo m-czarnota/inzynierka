@@ -8,6 +8,9 @@ class GameState {
         this.kindOfGame = null;
         this.gameInfoStorageKey = 'gameInfo';
 
+        this.turnFlag = null;
+        this.yourTurn = false;
+
         this.loadFromStorage();
     }
 
@@ -33,6 +36,10 @@ class GameState {
                 ships: shipPlacementService.stringifyShips(shipsStorage.ships),
             }
         }));
+    }
+
+    changeTurn(turnFlag = null) {
+        this.yourTurn = turnFlag ?? !this.yourTurn;
     }
 }
 

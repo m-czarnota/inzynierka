@@ -110,6 +110,8 @@ class MatchmakingEngine
         $gameRoom->setGame($game);
         $game->setGameRoom($gameRoom);
 
+        $game->setPlayerTurn(rand(0, 1));
+
         $this->em->persist($gameRoom);
         $this->em->persist($game);
 

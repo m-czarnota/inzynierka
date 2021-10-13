@@ -18,6 +18,7 @@ import {gameRouter} from "../../services/GameRouter";
 import {Board} from "../../entities/game/Board";
 import {Ship} from "../../entities/game/Ship";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
+import {gameState} from "../../services/GameState";
 
 export default {
     name: "GameComponent",
@@ -29,12 +30,17 @@ export default {
 
         onMounted(async () => {
             const response = await fetch(gameRouter.gameRoutes.getUserShips);
-            userShips.value = await response.json();
+            const data = await response.json();
 
+            userShips.value = data.ships;
             userShips.value.forEach(ship => boardUser.ships.push(Ship.createInstanceFromParsedObject(ship, boardUser)));
-
             dragDropShipHelper.board = boardUser;
             dragDropShipHelper.setAppropriateColorForAllFields();
+
+            gameState.turnFlag = data.turnFlag;
+            gameState.yourTurn = data.yourTurn;
+
+            this.listenForResponse();
         });
 
         return {
@@ -42,6 +48,36 @@ export default {
             boardUser,
             boardOpponent,
         };
+    },
+    methods: {
+        listenForResponse() {
+            setInterval(async () => {
+                const response = await fetch();
+                const data = response.json();
+
+                if (!response.status) {
+                    console.error(data.message);
+                    return;
+                }
+
+                this.serveAction(data);
+            }, 500);
+        },
+        serveAction(data) {
+            switch (data.status) {
+                case 'shot':
+                    break;
+                case 'change_turn':
+                    gameState.changeTurn();
+                    break;
+                case 'end_game':
+                    break;
+                case 'walkover':
+                    break;
+                case 'no_changed':
+                    break;
+            }
+        }
     },
 }
 </script>
