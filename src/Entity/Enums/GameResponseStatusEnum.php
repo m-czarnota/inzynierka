@@ -6,6 +6,7 @@ class GameResponseStatusEnum
 {
     const NO_CHANGED = 'no_changed';
     const CHANGE_TURN = 'change_turn';
+    const MISSED_TURN = 'missed_turn';
     const SHOT = 'shot';
     const END_GAME = 'end_game';
     const WALKOVER = 'walkover';
@@ -20,6 +21,7 @@ class GameResponseStatusEnum
         return [
             'no_changed' => self::NO_CHANGED,
             'change_turn' => self::CHANGE_TURN,
+            'missed_turn' => self::MISSED_TURN,
             'shot' => self::SHOT,
             'end_game' => self::END_GAME,
             'walkover' => self::WALKOVER,

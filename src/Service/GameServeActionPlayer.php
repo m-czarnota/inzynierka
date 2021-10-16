@@ -2,37 +2,76 @@
 
 namespace App\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Security;
+use App\Entity\Enums\GameResponseStatusEnum;
+use App\Entity\User;
+use http\Exception\RuntimeException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class GameServeActionPlayer
+class GameServeActionPlayer extends AbstractGameServePlayer
 {
-    private EntityManagerInterface $em;
-    private Security $security;
-
-    public function __construct(EntityManagerInterface $em, Security $security)
+    public function serveAction(array $data): array
     {
-        $this->em = $em;
-        $this->security = $security;
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $game = $user->getGame();
 
-        $lastActionData = [
-            'userAction' => 'user',
-            'status' => 'shoot/hit/shoot_down',
-            'coordinates' => 'A1',
-            'hit' => [
-                4 => [
-                    'elementsCount' => 3,
-                    'hit' => [1, 2],
-                ],
-                2 => [
-                    'elementsCount' => 2,
-                    'hit' => [2],
-                ],
-            ],
-            'killed' => [9, 4],
-            'positionInGameInfo' => 5,
-            'isReading' => 0,
-            'mishits' => ['A2', 'F5', 'C6'],
+        if (!$game) {
+            return [
+                'status' => 'error',
+                'message' => 'You are not in a game!',
+            ];
+            // Response::HTTP_BAD_REQUEST
+        }
+
+        if (!in_array($data['action'], [GameResponseStatusEnum::SHOT, GameResponseStatusEnum::MISSED_TURN])) {
+            throw new BadRequestHttpException("Wrong player's action passed to controller's action");
+        }
+
+        switch ($data['action']) {
+            case GameResponseStatusEnum::MISSED_TURN:
+                return $this->serveMissedTurn($data);
+            case GameResponseStatusEnum::SHOT:
+                return $this->serveShot($data);
+            default:
+                throw new RuntimeException("Player action's is wrong.");
+        }
+    }
+
+    private function serveMissedTurn(array $data): array
+    {
+        $this->changeTurn();
+        return [
+            'status' => GameResponseStatusEnum::CHANGE_TURN,
+            'message' => '',
         ];
+    }
+
+    private function serveShot(array $data): array
+    {
+        $lastAction = $this->getLastOpponentAction(true);
+        if ($lastAction === null || !empty($lastAction)) {
+            $lastAction = $this->generateEmptyLastAction();
+        }
+
+        return [
+            'status' => '',
+            'message' => '',
+        ];
+    }
+
+    private function changeTurn()
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $game = $user->getGame();
+
+        $gameInfo = $game->getGameInfo();
+        array_push($gameInfo, []);
+
+        $game->setGameInfo($gameInfo);
+        $game->setPlayerTurn($this->getUserPositionInQueue());
+
+        $this->em->persist($game);
+        $this->em->flush();
     }
 }
