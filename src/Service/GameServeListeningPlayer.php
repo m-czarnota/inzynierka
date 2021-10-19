@@ -41,7 +41,6 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
 
         // ship hit
 
-
         /** @var User $user */
         $user = $this->security->getUser();
         $game = $user->getGame();
@@ -64,7 +63,7 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         $lastAction = $this->getLastOpponentAction();
 
         foreach ($this->getUserShipsInfo() as $ship) {
-            if (in_array($ship->id, $lastAction['killed'])) {
+            if ($lastAction !== null || in_array($ship->id, $lastAction['killed'])) {
                 continue;
             }
 

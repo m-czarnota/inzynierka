@@ -137,4 +137,17 @@ abstract class AbstractGameServePlayer
             'mishits' => [],
         ];
     }
+
+    protected function findShipByIdInUserShips(int $shipId, bool $forOpponent = false): ?array
+    {
+        $userShipsInfo = $this->getUserShipsInfo($forOpponent);
+
+        foreach ($userShipsInfo as $ship) {
+            if ($ship->id === $shipId) {
+                return $ship;
+            }
+        }
+
+        return null;
+    }
 }
