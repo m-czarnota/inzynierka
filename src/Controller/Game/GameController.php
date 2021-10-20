@@ -4,6 +4,7 @@ namespace App\Controller\Game;
 
 use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\User;
+use App\Service\GameServeListeningPlayer;
 use App\Service\MatchmakingEngine;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -95,14 +96,14 @@ class GameController extends AbstractController
         ]);
     }
 
-    public function servePlayerInGameAction(EntityManagerInterface $em, Request $request): JsonResponse
+    /**
+     * @Route (path="/serveListeningPlayer", name="serve_listening_player")
+     */
+    public function servePlayerInGameAction(Request $request, GameServeListeningPlayer $serveListeningPlayer): JsonResponse
     {
+        $data = $serveListeningPlayer->serveAction();
 
-
-        return new JsonResponse([
-            'status' => 'no_changed',
-            'message' => "Waiting for action",
-        ]);
+        return new JsonResponse($data, $data['status'] !== 'error' ? Response::HTTP_OK : Response::HTTP_CONFLICT);
     }
 
     /**

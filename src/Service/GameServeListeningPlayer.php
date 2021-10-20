@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
 
 class GameServeListeningPlayer extends AbstractGameServePlayer
@@ -23,23 +24,31 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         return $this->serveWaitingLastAction();
     }
 
-    private function serveWaitingLastAction()
+    private function serveWaitingLastAction(): array
     {
+        $dataToReturn = [
+            'status' => null,
+            'message' => '',
+        ];
+
         $lastAction = $this->getLastOpponentAction();
         if (!$lastAction || $lastAction['isReading']) {
-            // waiting for action
+            $dataToReturn['status'] = GameResponseStatusEnum::NO_CHANGED;
+            return $dataToReturn;
         }
 
         $hitShipId = $this->getHitShipIdByCoordinatesFromLastAction();
         if (!$hitShipId) {
-            // mishit
+            $dataToReturn['status'] = GameResponseStatusEnum::MISS_HIT;
+            return $dataToReturn;
         }
 
         if ($this->isShipKilledInAction($lastAction, $hitShipId)) {
-            // ship killed
+            $dataToReturn['status'] = GameResponseStatusEnum::KILLED;
+            return $dataToReturn;
         }
 
-        // ship hit
+        $dataToReturn['status'] = GameResponseStatusEnum::HIT;
 
         /** @var User $user */
         $user = $this->security->getUser();
@@ -56,6 +65,8 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         if ($endGameData = $this->getEndGameData()) {
             return $endGameData;
         }
+
+        return $dataToReturn;
     }
 
     private function getHitShipIdByCoordinatesFromLastAction(): ?int

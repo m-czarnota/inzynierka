@@ -40,7 +40,7 @@ export default {
             gameState.turnFlag = data.turnFlag;
             gameState.yourTurn = data.yourTurn;
 
-            this.listenForResponse();
+            listenForResponse();
         });
 
         return {
@@ -49,36 +49,38 @@ export default {
             boardOpponent,
         };
     },
-    methods: {
-        listenForResponse() {
-            setInterval(async () => {
-                const response = await fetch();
-                const data = response.json();
+    methods: {},
+}
 
-                if (!response.status) {
-                    console.error(data.message);
-                    return;
-                }
+const listenForResponse = () => {
+    setInterval(async () => {
+        const response = await fetch(gameRouter.gameRoutes.serveListeningPlayer);
+        const data = response.json();
 
-                this.serveAction(data);
-            }, 500);
-        },
-        serveAction(data) {
-            switch (data.status) {
-                case 'shot':
-                    break;
-                case 'change_turn':
-                    gameState.changeTurn();
-                    break;
-                case 'end_game':
-                    break;
-                case 'walkover':
-                    break;
-                case 'no_changed':
-                    break;
-            }
+        if (!response.status) {
+            console.error(data.message);
+            return;
         }
-    },
+
+        serveAction(data);
+    }, 1000);
+};
+
+const serveAction = (data) => {
+    console.log(data.status);
+    switch (data.status) {
+        case 'shot':
+            break;
+        case 'change_turn':
+            gameState.changeTurn();
+            break;
+        case 'end_game':
+            break;
+        case 'walkover':
+            break;
+        case 'no_changed':
+            break;
+    }
 }
 </script>
 

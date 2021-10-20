@@ -11,6 +11,7 @@ class GameRouter {
             'prepareGame': this.getRoutePath('route-to-game-prepare-game'),
             'isUserInGame': this.getRoutePath('route-to-game-check-is-game'),
             'getUserShips': this.getRoutePath('route-to-game-get-user-ships'),
+            'serveListeningPlayer': this.getRoutePath('route-to-game-serve-listening-player'),
         }
         this.routeToGame = document.querySelector('#route-to-game').value;
 
