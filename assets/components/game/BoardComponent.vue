@@ -3,7 +3,10 @@
          ref="boardRef"
          :class="{ 'col-6': $router.currentRoute.value.name === 'Arrange Ships' }">
         <div v-for="n in size" class="board-row">
-            <field-component v-for="k in size" :data-coordinates="n + '' + k"
+            <field-component v-for="k in size"
+                             :data-coordinates="n + '' + k"
+                             :disable-props="disable"
+                             :is-user-owner="isUserOwner"
                              @drop="dragDropShipHelper.onDrop($event)"
                              @dragenter="dragDropShipHelper.onDragEnter($event)"
                              @dragleave="dragDropShipHelper.onDragLeave($event)"
@@ -28,7 +31,7 @@ export default {
             dragDropShipHelper: dragDropShipHelper,
         };
     },
-    props: ['board'],
+    props: ['board', 'disable', 'isUserOwner'],
     mounted() {
         if (this.board.wasFirstMount) {
             this.updateBoard();

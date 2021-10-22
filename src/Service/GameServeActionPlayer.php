@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Enums\GameRequestStatusEnum;
 use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
 use http\Exception\RuntimeException;
@@ -17,20 +18,19 @@ class GameServeActionPlayer extends AbstractGameServePlayer
 
         if (!$game) {
             return [
-                'status' => 'error',
+                'status' => GameResponseStatusEnum::ERROR,
                 'message' => 'You are not in a game!',
             ];
-            // Response::HTTP_BAD_REQUEST
         }
 
-        if (!in_array($data['action'], [GameResponseStatusEnum::SHOT, GameResponseStatusEnum::MISSED_TURN])) {
+        if (!in_array($data['action'], [GameRequestStatusEnum::SHOT, GameRequestStatusEnum::MISSED_TURN])) {
             throw new BadRequestHttpException("Wrong player's action passed to controller's action");
         }
 
         switch ($data['action']) {
-            case GameResponseStatusEnum::MISSED_TURN:
+            case GameRequestStatusEnum::MISSED_TURN:
                 return $this->serveMissedTurn($data);
-            case GameResponseStatusEnum::SHOT:
+            case GameRequestStatusEnum::SHOT:
                 return $this->serveShot($data);
             default:
                 throw new RuntimeException("Player action's is wrong.");
@@ -41,7 +41,7 @@ class GameServeActionPlayer extends AbstractGameServePlayer
     {
         $this->changeTurn();
         return [
-            'status' => GameResponseStatusEnum::CHANGE_TURN,
+            'status' => GameResponseStatusEnum::MISSED_TURN,
             'message' => '',
         ];
     }
@@ -49,8 +49,8 @@ class GameServeActionPlayer extends AbstractGameServePlayer
     private function serveShot(array $data): array
     {
         $dataToReturn = [
-            'status' => null,
-            'message' => '',
+            'status' => GameResponseStatusEnum::MISS_HIT,
+            'message' => 'Miss hit. Change turn.',
         ];
 
         $lastAction = $this->generateEmptyLastAction();
@@ -60,20 +60,23 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         $hitShipId = $this->getHitShipId($opponentShipsInfo, $data['coordinates']);
         if ($hitShipId !== null) {
             $isKilledHitShip = $this->isKilledHitShip($hitShipId);
-            $status = $isKilledHitShip ? 'killed' : 'hit';
+            $status = $isKilledHitShip ? GameResponseStatusEnum::KILLED : GameResponseStatusEnum::HIT;
 
             $lastAction['status'] = $status;
             $dataToReturn['status'] = $status;
+            $dataToReturn['message'] = 'Hit! You receive additional turn!';
 
             if ($this->isKilledHitShip($hitShipId)) {
                 array_push($lastAction['killed'], $hitShipId);
             }
             $this->addShipToHitInLastAction($lastAction, $hitShipId);
         } else {
-            $status = 'missed';
             array_push($lastAction['mishits'], $data['coordinates']);
+
+            $status = GameResponseStatusEnum::MISS_HIT;
             $lastAction['status'] = $status;
             $dataToReturn['status'] = $status;
+            $dataToReturn['message'] = 'Killed! You receive additional turn!';
         }
 
         $this->saveLastAction($lastAction);
@@ -82,7 +85,9 @@ class GameServeActionPlayer extends AbstractGameServePlayer
             return $endGameData;
         }
 
-        $this->changeTurn();
+        if ($lastAction['status'] === GameResponseStatusEnum::MISS_HIT) {
+            $this->changeTurn();
+        }
 
         return $dataToReturn;
     }
@@ -132,10 +137,6 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         $user = $this->security->getUser();
         $game = $user->getGame();
 
-        $gameInfo = $game->getGameInfo();
-        array_push($gameInfo, []);
-
-        $game->setGameInfo($gameInfo);
         $game->setPlayerTurn($this->getUserPositionInQueue());
 
         $this->em->persist($game);
@@ -144,7 +145,15 @@ class GameServeActionPlayer extends AbstractGameServePlayer
 
     private function saveLastAction(array $lastAction): void
     {
-        $this->em->persist($lastAction);
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $game = $user->getGame();
+
+        $gameInfo = $game->getGameInfo();
+        array_push($gameInfo, $lastAction);
+        $game->setGameInfo($gameInfo);
+
+        $this->em->persist($game);
         $this->em->flush();
     }
 

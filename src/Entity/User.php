@@ -69,11 +69,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?GameRoom $gameRoom;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Game::class)
-     */
-    private ?Game $game;
-
-    /**
      * @ORM\OneToMany(targetEntity=MatchHistory::class, mappedBy="userWin", orphanRemoval=true)
      */
     private Collection $matchHistories;
@@ -87,6 +82,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="boolean")
      */
     private bool $isVerified = false;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Game::class, inversedBy="users")
+     */
+    private ?Game $game;
 
     public function __construct()
     {
@@ -273,18 +273,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGame(): ?Game
-    {
-        return $this->game;
-    }
-
-    public function setGame(?Game $game): self
-    {
-        $this->game = $game;
-
-        return $this;
-    }
-
     /**
      * @return Collection|MatchHistory[]
      */
@@ -362,6 +350,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getGame(): ?Game
+    {
+        return $this->game;
+    }
+
+    public function setGame(?Game $game): self
+    {
+        $this->game = $game;
 
         return $this;
     }

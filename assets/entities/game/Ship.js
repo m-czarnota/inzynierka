@@ -63,6 +63,21 @@ export class Ship {
         }
     }
 
+    setKilledStatus() {
+        this.boardFields.forEach(field => {
+            field.setKilledStatus();
+
+            if (!this.hitElements.includes(field)) {
+                this.hitElements.push(field);
+            }
+        });
+        this.aroundFields.forEach(field => field.setInactiveStatus());
+    }
+
+    isKilled() {
+        return this.hitElements.length === this.elementsCount;
+    }
+
     static createInstanceFromParsedObject(parsedShip, board) {
         const getParsedBoardField = parsedBoardField => {
             const boardField = board.getFieldByCoordinates(parsedBoardField.coordinates);

@@ -2,10 +2,10 @@
     <div class="game-component">
         <div class="game-boards d-flex">
             <div class="player col-6" id="user">
-                <board-component :board="boardUser"></board-component>
+                <board-component :board="boardUser" :is-user-owner="true"></board-component>
             </div>
             <div class="player col-6" id="opponent">
-                <board-component></board-component>
+                <board-component :board="boardOpponent" :disable="gameState.yourTurn"></board-component>
             </div>
         </div>
     </div>
@@ -19,10 +19,17 @@ import {Board} from "../../entities/game/Board";
 import {Ship} from "../../entities/game/Ship";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameState} from "../../services/GameState";
+import {responseStatuses} from "../../loaders/appGame";
+import {serveResponseRequestHelper} from "../../services/ServeResponseRequestHelper";
 
 export default {
     name: "GameComponent",
     components: {BoardComponent},
+    data() {
+        return {
+            gameState: gameState,
+        };
+    },
     setup() {
         const userShips = ref(null);
         const boardUser = new Board();
@@ -38,9 +45,9 @@ export default {
             dragDropShipHelper.setAppropriateColorForAllFields();
 
             gameState.turnFlag = data.turnFlag;
-            gameState.yourTurn = data.yourTurn;
+            gameState.changeTurn(data.yourTurn);
 
-            listenForResponse();
+            // listenForResponse(boardUser);
         });
 
         return {
@@ -52,33 +59,40 @@ export default {
     methods: {},
 }
 
-const listenForResponse = () => {
+const listenForResponse = (board) => {
     setInterval(async () => {
         const response = await fetch(gameRouter.gameRoutes.serveListeningPlayer);
-        const data = response.json();
+        const data = await response.json();
 
         if (!response.status) {
             console.error(data.message);
             return;
         }
 
-        serveAction(data);
+        serveAction(data, board);
     }, 1000);
 };
 
-const serveAction = (data) => {
-    console.log(data.status);
+const serveAction = (data, board) => {
     switch (data.status) {
-        case 'shot':
+        case responseStatuses.error:
+            console.error(data.message);
             break;
-        case 'change_turn':
+        case responseStatuses.hit:
+            serveResponseRequestHelper.serveHitResponse(data, board);
+            break;
+        case responseStatuses.killed:
+            serveResponseRequestHelper.serveKillResponse(data, board);
+            break;
+        case responseStatuses.miss_hit:
+            serveResponseRequestHelper.serveMissHitResponse(data);
             gameState.changeTurn();
             break;
-        case 'end_game':
+        case responseStatuses.end_game:
+            serveResponseRequestHelper.serveEndGame(data);
             break;
-        case 'walkover':
-            break;
-        case 'no_changed':
+        case responseStatuses.walkover:
+            serveResponseRequestHelper.serveWalkover(data);
             break;
     }
 }

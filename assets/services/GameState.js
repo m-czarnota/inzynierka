@@ -1,6 +1,7 @@
 import {shipsStorage} from "../entities/game/ShipsStorage";
 import {board} from "../entities/game/Board";
 import {shipPlacementService} from "./ShipPlacementService";
+import {emitter} from "./Emitter";
 
 class GameState {
     constructor() {
@@ -40,6 +41,7 @@ class GameState {
 
     changeTurn(turnFlag = null) {
         this.yourTurn = turnFlag ?? !this.yourTurn;
+        emitter.emit('yourTurn', gameState.yourTurn);
     }
 }
 

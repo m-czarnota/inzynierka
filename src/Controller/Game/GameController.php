@@ -2,11 +2,13 @@
 
 namespace App\Controller\Game;
 
+use App\Entity\Enums\GameRequestStatusEnum;
+use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\User;
+use App\Service\GameServeActionPlayer;
 use App\Service\GameServeListeningPlayer;
 use App\Service\MatchmakingEngine;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,7 +52,7 @@ class GameController extends AbstractController
         ], $request->get('whichApproach'));
         if (!$opponent) {
             return new JsonResponse([
-                'state' => 'error',
+                'state' => GameResponseStatusEnum::ERROR,
                 'message' => 'Sorry, game has not been found.',
             ], Response::HTTP_ACCEPTED);
         }
@@ -79,19 +81,20 @@ class GameController extends AbstractController
     /**
      * @Route(path="/getUserShips", name="get_user_ships")
      */
-    public function getUserShipsAction(EntityManagerInterface $em): JsonResponse
+    public function getUserShipsAction(): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
         $game = $user->getGame();
 
-        $turnFlag = array_search($user, $game->getUsers());
+        $turnFlag = array_search($user, $game->getUsers()->getValues());
         $gameShips = $user->getGame()->getGameInfo();
         $userShips = $gameShips[$turnFlag];
 
         return new JsonResponse([
             'ships' => $userShips,
             'turnFlag' => $turnFlag,
+            'yourTurn' => $game->getPlayerTurn() === $turnFlag,
             'playerTurn' => $turnFlag === $game->getPlayerTurn(),
         ]);
     }
@@ -99,11 +102,25 @@ class GameController extends AbstractController
     /**
      * @Route (path="/serveListeningPlayer", name="serve_listening_player")
      */
-    public function servePlayerInGameAction(Request $request, GameServeListeningPlayer $serveListeningPlayer): JsonResponse
+    public function serveListeningPlayerAction(Request $request, GameServeListeningPlayer $serveListeningPlayer): JsonResponse
     {
         $data = $serveListeningPlayer->serveAction();
 
-        return new JsonResponse($data, $data['status'] !== 'error' ? Response::HTTP_OK : Response::HTTP_CONFLICT);
+        return new JsonResponse($data, $data['status'] !== GameResponseStatusEnum::ERROR ? Response::HTTP_OK : Response::HTTP_CONFLICT);
+    }
+
+    /**
+     * @Route (path="/servePlayerMove", name="serve_player_move", methods={"POST"})
+     */
+    public function servePlayerMoveAction(Request $request, GameServeActionPlayer $serveActionPlayer): JsonResponse
+    {
+        $dataFromPlayer = [
+            'action' => $request->get('action'),
+            'coordinates' => $request->get('coordinates'),
+        ];
+        $data = $serveActionPlayer->serveAction($dataFromPlayer);
+
+        return new JsonResponse($data);
     }
 
     /**
@@ -113,6 +130,8 @@ class GameController extends AbstractController
     {
         return $this->render('game/base.html.twig', [
             'kindsOfGame' => base64_encode(json_encode(KindOfGameEnum::serialize())),
+            'responseStatuses' => base64_encode(json_encode(GameResponseStatusEnum::serialise())),
+            'requestStatuses' => base64_encode(json_encode(GameRequestStatusEnum::serialise())),
         ]);
     }
 }

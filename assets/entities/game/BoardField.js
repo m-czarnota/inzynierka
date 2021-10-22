@@ -55,6 +55,32 @@ export class BoardField {
         }
     }
 
+    setHitStatus() {
+        if (this.shipPointer === -1) {
+            return;
+        }
+
+        this.isHit = true;
+        this.htmlElement.backgroundColor = 'brown';
+    }
+
+    setKilledStatus() {
+        if (this.numberOfShipElement === -1) {
+            return;
+        }
+
+        this.isHit = true;
+        this.htmlElement.backgroundColor = 'purple';
+    }
+
+    setInactiveStatus() {
+        if (this.isNextToShipPointers.length === 0 || this.isHit === false) {
+            return;
+        }
+
+        this.htmlElement.backgroundColor = 'gray';
+    }
+
     remove() {
         delete this;
     }

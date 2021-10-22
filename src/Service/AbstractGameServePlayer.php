@@ -43,7 +43,7 @@ abstract class AbstractGameServePlayer
         $user = $this->security->getUser();
         $game = $user->getGame();
 
-        $userPositionInQueue = array_search($user, $game->getUsers());
+        $userPositionInQueue = array_search($user, $game->getUsers()->getValues());
         return $searchOpponent ? (int)!$userPositionInQueue : $userPositionInQueue;
     }
 
@@ -61,7 +61,7 @@ abstract class AbstractGameServePlayer
         $actions = [];
         $searchedOpponent = $game->getUsers()[$this->getUserPositionInQueue(!$findForUser)];
         foreach ($gameInfo as $index => $action) {
-            if (in_array($index, range(0, 1)) || $action['userAction'] === $searchedOpponent) {
+            if (in_array($index, range(0, count($game->getUsers()) - 1)) || $action['userAction'] === $searchedOpponent) {
                 continue;
             }
 

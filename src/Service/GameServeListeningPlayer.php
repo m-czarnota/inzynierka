@@ -15,7 +15,7 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
 
         if (!$game) {
             return [
-                'status' => 'error',
+                'status' => GameResponseStatusEnum::ERROR,
                 'message' => 'You are not in a game!',
             ];
             // Response::HTTP_BAD_REQUEST
@@ -27,28 +27,30 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
     private function serveWaitingLastAction(): array
     {
         $dataToReturn = [
-            'status' => null,
-            'message' => '',
+            'status' => GameResponseStatusEnum::NO_CHANGED,
+            'message' => 'Waiting for action.',
         ];
 
         $lastAction = $this->getLastOpponentAction();
         if (!$lastAction || $lastAction['isReading']) {
-            $dataToReturn['status'] = GameResponseStatusEnum::NO_CHANGED;
             return $dataToReturn;
         }
 
         $hitShipId = $this->getHitShipIdByCoordinatesFromLastAction();
         if (!$hitShipId) {
             $dataToReturn['status'] = GameResponseStatusEnum::MISS_HIT;
+            $dataToReturn['message'] = 'The opponent missed. Change turn.';
             return $dataToReturn;
         }
 
         if ($this->isShipKilledInAction($lastAction, $hitShipId)) {
             $dataToReturn['status'] = GameResponseStatusEnum::KILLED;
+            $dataToReturn['message'] = 'The opponent killed your ship! Additional turn for opponent.';
             return $dataToReturn;
         }
 
         $dataToReturn['status'] = GameResponseStatusEnum::HIT;
+        $dataToReturn['message'] = 'The opponent hit your ship! Additional turn for opponent.';
 
         /** @var User $user */
         $user = $this->security->getUser();

@@ -4,12 +4,15 @@ namespace App\Entity\Enums;
 
 class GameResponseStatusEnum
 {
+    const ERROR = 'error';
     const NO_CHANGED = 'no_changed';
+
     const HIT = 'hit';
     const MISS_HIT = 'mishit';
     const KILLED = 'killed';
 
     const MISSED_TURN = 'missed_turn';
+
     const END_GAME = 'end_game';
     const WALKOVER = 'walkover';
 
@@ -21,6 +24,7 @@ class GameResponseStatusEnum
     static public function serialise(): array
     {
         return [
+            'error' => self::ERROR,
             'no_changed' => self::NO_CHANGED,
             'missed_turn' => self::MISSED_TURN,
             'miss_hit' => self::MISS_HIT,
