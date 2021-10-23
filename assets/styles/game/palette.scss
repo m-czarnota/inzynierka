@@ -1,7 +1,11 @@
 $board-cell-background: hsl(140, 25%, 68%);
 $board-cell-background-hover: hsl(140, 75%, 68%);
-$board-cell-background-disable: hsl(140, 75%, 68%);
+$board-cell-background-disable: hsl(143, 64%, 15%);
 $board-cell-border: black;
+
+$board-cell-miss-background: hsl(46, 65%, 43%);
+$ship-element-hit-background: hsl(0, 65%, 43%);
+$ship-element-kill-background: hsl(289, 65%, 43%);
 
 $ship-component-border: gray;
 

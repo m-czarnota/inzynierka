@@ -19,7 +19,7 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         if (!$game) {
             return [
                 'status' => GameResponseStatusEnum::ERROR,
-                'message' => 'You are not in a game!',
+                'message' => $this->translator->trans('game.gameActions.requests.notInGame'),
             ];
         }
 
@@ -50,7 +50,7 @@ class GameServeActionPlayer extends AbstractGameServePlayer
     {
         $dataToReturn = [
             'status' => GameResponseStatusEnum::MISS_HIT,
-            'message' => 'Miss hit. Change turn.',
+            'message' => $this->translator->trans('game.gameActions.requests.miss_hit'),
         ];
 
         $lastAction = $this->generateEmptyLastAction();
@@ -58,13 +58,14 @@ class GameServeActionPlayer extends AbstractGameServePlayer
 
         $opponentShipsInfo = $this->getUserShipsInfo(true);
         $hitShipId = $this->getHitShipId($opponentShipsInfo, $data['coordinates']);
+
         if ($hitShipId !== null) {
             $isKilledHitShip = $this->isKilledHitShip($hitShipId);
             $status = $isKilledHitShip ? GameResponseStatusEnum::KILLED : GameResponseStatusEnum::HIT;
 
             $lastAction['status'] = $status;
             $dataToReturn['status'] = $status;
-            $dataToReturn['message'] = 'Hit! You receive additional turn!';
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.requests.' . $isKilledHitShip ? 'killed' : 'hit');
 
             if ($this->isKilledHitShip($hitShipId)) {
                 array_push($lastAction['killed'], $hitShipId);
@@ -72,11 +73,7 @@ class GameServeActionPlayer extends AbstractGameServePlayer
             $this->addShipToHitInLastAction($lastAction, $hitShipId);
         } else {
             array_push($lastAction['mishits'], $data['coordinates']);
-
-            $status = GameResponseStatusEnum::MISS_HIT;
-            $lastAction['status'] = $status;
-            $dataToReturn['status'] = $status;
-            $dataToReturn['message'] = 'Killed! You receive additional turn!';
+            $lastAction['status'] = GameResponseStatusEnum::MISS_HIT;
         }
 
         $this->saveLastAction($lastAction);
@@ -97,13 +94,13 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         $lastOpponentAction = $this->getLastOpponentAction();
 
         foreach ($ships as $ship) {
-            if ($lastOpponentAction !== null && in_array($ship->id, $lastOpponentAction['killed'])) {
+            if ($lastOpponentAction !== null && in_array($ship['id'], $lastOpponentAction['killed'])) {
                 continue;
             }
 
-            foreach ($ship->boardFields as $boardField) {
-                if ($boardField->coordinates === $coordinates) {
-                    return $ship->id;
+            foreach ($ship['boardFields'] as $boardField) {
+                if ($boardField['coordinates'] === $coordinates) {
+                    return $ship['id'];
                 }
             }
         }
@@ -118,13 +115,13 @@ class GameServeActionPlayer extends AbstractGameServePlayer
             return false;
         }
 
-        if ($ship->elementsCount === 1) {
+        if ($ship['elementsCount'] === 1) {
             return true;
         }
 
         $lastOpponentAction = $this->getLastOpponentAction();
         if ($lastOpponentAction !== null && array_key_exists($shipId, $lastOpponentAction['hit'])
-            && count($lastOpponentAction['hit'][$shipId]['hit']) === $ship->elementsCount - 1) {
+            && count($lastOpponentAction['hit'][$shipId]['hit']) === $ship['elementsCount'] - 1) {
             return true;
         }
 
@@ -137,7 +134,7 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         $user = $this->security->getUser();
         $game = $user->getGame();
 
-        $game->setPlayerTurn($this->getUserPositionInQueue());
+        $game->setPlayerTurn((int)!$game->getPlayerTurn());
 
         $this->em->persist($game);
         $this->em->flush();

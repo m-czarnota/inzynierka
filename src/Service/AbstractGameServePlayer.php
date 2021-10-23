@@ -5,16 +5,19 @@ namespace App\Service;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class AbstractGameServePlayer
 {
     protected EntityManagerInterface $em;
     protected Security $security;
+    protected TranslatorInterface $translator;
 
-    public function __construct(EntityManagerInterface $em, Security $security)
+    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator)
     {
         $this->em = $em;
         $this->security = $security;
+        $this->translator = $translator;
 
         $lastActionData = [
             'userAction' => 'user',
@@ -61,7 +64,7 @@ abstract class AbstractGameServePlayer
         $actions = [];
         $searchedOpponent = $game->getUsers()[$this->getUserPositionInQueue(!$findForUser)];
         foreach ($gameInfo as $index => $action) {
-            if (in_array($index, range(0, count($game->getUsers()) - 1)) || $action['userAction'] === $searchedOpponent) {
+            if (in_array($index, range(0, count($game->getUsers()) - 1)) || $action['userAction'] === $searchedOpponent->getId()) {
                 continue;
             }
 
@@ -127,7 +130,7 @@ abstract class AbstractGameServePlayer
         $game = $user->getGame();
 
         return [
-            'userAction' => $this->security->getUser(),
+            'userAction' => $user->getId(),
             'status' => null,
             'coordinates' => null,
             'hit' => [],
@@ -143,7 +146,7 @@ abstract class AbstractGameServePlayer
         $userShipsInfo = $this->getUserShipsInfo($forOpponent);
 
         foreach ($userShipsInfo as $ship) {
-            if ($ship->id === $shipId) {
+            if ($ship['id'] === $shipId) {
                 return $ship;
             }
         }

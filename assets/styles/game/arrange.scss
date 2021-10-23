@@ -13,26 +13,10 @@
   min-width: 20px;
   max-height: 20px;
   max-width: 20px;
-  background-color: $board-cell-background;
   margin: 5px;
   border-radius: 3px;
   border: 1px solid $board-cell-border;
   cursor: pointer;
-
-  &:hover {
-    background-color: $board-cell-background-hover;
-  }
-
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: $board-cell-background;
-  }
-}
-
-.board-cell-disable {
-  background-color: $board-cell-background-disable;
-  cursor: default;
 }
 
 .board-ship {

@@ -16,7 +16,7 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         if (!$game) {
             return [
                 'status' => GameResponseStatusEnum::ERROR,
-                'message' => 'You are not in a game!',
+                'message' => $this->translator->trans('game.gameActions.responses.notInGame'),
             ];
             // Response::HTTP_BAD_REQUEST
         }
@@ -28,7 +28,7 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
     {
         $dataToReturn = [
             'status' => GameResponseStatusEnum::NO_CHANGED,
-            'message' => 'Waiting for action.',
+            'message' => $this->translator->trans('game.gameActions.responses.waiting'),
         ];
 
         $lastAction = $this->getLastOpponentAction();
@@ -39,18 +39,18 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         $hitShipId = $this->getHitShipIdByCoordinatesFromLastAction();
         if (!$hitShipId) {
             $dataToReturn['status'] = GameResponseStatusEnum::MISS_HIT;
-            $dataToReturn['message'] = 'The opponent missed. Change turn.';
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.miss_hit');
             return $dataToReturn;
         }
 
         if ($this->isShipKilledInAction($lastAction, $hitShipId)) {
             $dataToReturn['status'] = GameResponseStatusEnum::KILLED;
-            $dataToReturn['message'] = 'The opponent killed your ship! Additional turn for opponent.';
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.killed');
             return $dataToReturn;
         }
 
         $dataToReturn['status'] = GameResponseStatusEnum::HIT;
-        $dataToReturn['message'] = 'The opponent hit your ship! Additional turn for opponent.';
+        $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.hit');
 
         /** @var User $user */
         $user = $this->security->getUser();
@@ -76,13 +76,13 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         $lastAction = $this->getLastOpponentAction();
 
         foreach ($this->getUserShipsInfo() as $ship) {
-            if ($lastAction !== null || in_array($ship->id, $lastAction['killed'])) {
+            if ($lastAction !== null || in_array($ship['id'], $lastAction['killed'])) {
                 continue;
             }
 
-            foreach ($ship->boardFields as $boardField) {
-                if ($boardField->coordinates === $lastAction['coordinates']) {
-                    return $ship->id;
+            foreach ($ship['boardFields'] as $boardField) {
+                if ($boardField['coordinates'] === $lastAction['coordinates']) {
+                    return $ship['id'];
                 }
             }
         }

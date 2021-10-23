@@ -55,13 +55,24 @@ export class BoardField {
         }
     }
 
+    setShotStatus(withHit = true) {
+        this.isHit = withHit;
+        this.htmlElement.classList.remove('active');
+        this.htmlElement.classList.add('inactive');
+    }
+
+    setMisHitStatus() {
+        this.setShotStatus();
+        this.htmlElement.classList.add('miss');
+    }
+
     setHitStatus() {
         if (this.shipPointer === -1) {
             return;
         }
 
-        this.isHit = true;
-        this.htmlElement.backgroundColor = 'brown';
+        this.setShotStatus();
+        this.htmlElement.classList.add('hit');
     }
 
     setKilledStatus() {
@@ -69,8 +80,8 @@ export class BoardField {
             return;
         }
 
-        this.isHit = true;
-        this.htmlElement.backgroundColor = 'purple';
+        this.setShotStatus();
+        this.htmlElement.classList.add('killed');
     }
 
     setInactiveStatus() {
@@ -78,7 +89,7 @@ export class BoardField {
             return;
         }
 
-        this.htmlElement.backgroundColor = 'gray';
+        this.setShotStatus(false);
     }
 
     remove() {

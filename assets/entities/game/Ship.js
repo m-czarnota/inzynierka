@@ -1,5 +1,3 @@
-import {board} from "./Board";
-
 const $ = require("jquery");
 
 let id = 0;

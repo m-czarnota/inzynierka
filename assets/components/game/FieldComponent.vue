@@ -1,5 +1,5 @@
 <template>
-    <div class="board-cell" :class="{ disabled: disable }" ref="board-cell"></div>
+    <div class="board-cell" ref="board-cell"></div>
 </template>
 
 <script>
@@ -22,9 +22,8 @@ export default {
     },
     props: ['disableProps', 'isUserOwner'],
     mounted() {
-        if (this.disable !== undefined && !this.disable) {
-            this.turnOn();
-        }
+        this.$refs["board-cell"].classList.add(this.isUserOwner ? 'inactive' : 'active');
+        this.disable !== undefined && !this.disable ? this.turnOn() : this.$refs["board-cell"].classList.add('disabled');
 
         emitter.on('yourTurn', yourTurn => {
             if (this.isUserOwner) {
@@ -39,9 +38,11 @@ export default {
             return this.$parent.$props.board;
         },
         turnOn() {
+            this.$refs["board-cell"].classList.remove('disabled');
             this.$refs["board-cell"].addEventListener("click", this.shot);
         },
         turnOff() {
+            this.$refs["board-cell"].classList.add('disabled');
             this.$refs["board-cell"].removeEventListener("click", this.shot);
         },
         async shot(event) {
@@ -61,21 +62,22 @@ export default {
             this.actionAfterShot(data);
         },
         actionAfterShot(data) {
+            console.log(data.message);
             switch (data.status) {
                 case responseStatuses.error:
                     console.error(data.message);
                     break;
                 case responseStatuses.hit:
-                    serveResponseRequestHelper.serveHitRequest(data, this.getBoard(), this.lastShotCoordinates);
+                    this.serveHit();
                     break;
                 case responseStatuses.killed:
-                    serveResponseRequestHelper.serveKillRequest(data, this.getBoard(), this.lastShotCoordinates);
+                    this.serveKill();
                     break;
                 case responseStatuses.miss_hit:
-                    serveResponseRequestHelper.serveMissHitRequest(data);
-                    gameState.changeTurn();
+                    this.serveMissHit();
                     break;
                 case responseStatuses.end_game:
+                    this.actionAfterShot(data.originalAction);
                     serveResponseRequestHelper.serveEndGame(data);
                     break;
                 case responseStatuses.walkover:
@@ -83,6 +85,21 @@ export default {
                     break;
             }
         },
+        serveHit() {
+            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
+            field.setHitStatus();
+        },
+        serveKill() {
+            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
+            const ship = this.getBoard().ships.find(ship => ship === field.shipPointer);
+            ship.setKilledStatus();
+        },
+        serveMissHit() {
+            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
+            field.setMisHitStatus();
+
+            setTimeout(() => gameState.changeTurn(), 1000);
+        }
     },
     watch: {
         disable(newVal) {
