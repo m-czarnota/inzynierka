@@ -8,7 +8,7 @@ use App\Entity\User;
 use http\Exception\RuntimeException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class GameServeActionPlayer extends AbstractGameServePlayer
+class GameServeActionPlayer extends GameServePlayer
 {
     public function serveAction(array $data): array
     {
@@ -37,27 +37,40 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function serveMissedTurn(array $data): array
     {
         $this->changeTurn();
         return [
             'status' => GameResponseStatusEnum::MISSED_TURN,
             'message' => '',
+            'yourTurn' => $this->isYourTurn(),
+            'userAction' => $this->security->getUser()->getId(),
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     private function serveShot(array $data): array
     {
         $dataToReturn = [
             'status' => GameResponseStatusEnum::MISS_HIT,
             'message' => $this->translator->trans('game.gameActions.requests.miss_hit'),
+            'yourTurn' => $this->isYourTurn(),
+            'userAction' => $this->security->getUser()->getId(),
+            'coordinates' => $data['coordinates'],
         ];
 
-        $lastAction = $this->generateEmptyLastAction();
+        $previousAction = $this->getLastOpponentAction(true);
+        $lastAction = $previousAction ?? $this->generateEmptyLastAction();
+        $lastAction['isReading'] = false;
+        $lastAction['positionInGameInfo'] = count($this->getGameInfo());
         $lastAction['coordinates'] = $data['coordinates'];
 
-        $opponentShipsInfo = $this->getUserShipsInfo(true);
-        $hitShipId = $this->getHitShipId($opponentShipsInfo, $data['coordinates']);
+        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo(true), $data['coordinates']);
 
         if ($hitShipId !== null) {
             $isKilledHitShip = $this->isKilledHitShip($hitShipId);
@@ -65,11 +78,16 @@ class GameServeActionPlayer extends AbstractGameServePlayer
 
             $lastAction['status'] = $status;
             $dataToReturn['status'] = $status;
-            $dataToReturn['message'] = $this->translator->trans('game.gameActions.requests.' . $isKilledHitShip ? 'killed' : 'hit');
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.requests.' . ($isKilledHitShip ? 'killed' : 'hit'));
 
-            if ($this->isKilledHitShip($hitShipId)) {
+            if ($isKilledHitShip) {
                 array_push($lastAction['killed'], $hitShipId);
+
+                $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, true);
+                $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
+                $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
             }
+
             $this->addShipToHitInLastAction($lastAction, $hitShipId);
         } else {
             array_push($lastAction['mishits'], $data['coordinates']);
@@ -84,30 +102,15 @@ class GameServeActionPlayer extends AbstractGameServePlayer
 
         if ($lastAction['status'] === GameResponseStatusEnum::MISS_HIT) {
             $this->changeTurn();
+            $dataToReturn['yourTurn'] = $this->isYourTurn();
         }
 
         return $dataToReturn;
     }
 
-    private function getHitShipId(array $ships, string $coordinates): ?int
-    {
-        $lastOpponentAction = $this->getLastOpponentAction();
-
-        foreach ($ships as $ship) {
-            if ($lastOpponentAction !== null && in_array($ship['id'], $lastOpponentAction['killed'])) {
-                continue;
-            }
-
-            foreach ($ship['boardFields'] as $boardField) {
-                if ($boardField['coordinates'] === $coordinates) {
-                    return $ship['id'];
-                }
-            }
-        }
-
-        return null;
-    }
-
+    /**
+     * @throws \Exception
+     */
     private function isKilledHitShip(int $shipId): bool
     {
         $ship = $this->findShipByIdInUserShips($shipId, true);
@@ -119,9 +122,13 @@ class GameServeActionPlayer extends AbstractGameServePlayer
             return true;
         }
 
-        $lastOpponentAction = $this->getLastOpponentAction();
-        if ($lastOpponentAction !== null && array_key_exists($shipId, $lastOpponentAction['hit'])
-            && count($lastOpponentAction['hit'][$shipId]['hit']) === $ship['elementsCount'] - 1) {
+        $lastAction = $this->getLastOpponentAction(true);
+        if ($lastAction === null) {
+            return false;
+        }
+
+        if (array_key_exists($shipId, $lastAction['hit'])
+            && count($lastAction['hit'][$shipId]['hit']) === $ship['elementsCount'] - 1) {
             return true;
         }
 
@@ -154,12 +161,18 @@ class GameServeActionPlayer extends AbstractGameServePlayer
         $this->em->flush();
     }
 
+    /**
+     * @throws \Exception
+     */
     private function addShipToHitInLastAction(array &$lastAction, int $hitShipId)
     {
-        $ship = $this->findShipByIdInUserShips($hitShipId);
+        $ship = $this->findShipByIdInUserShips($hitShipId, true);
 
         if (array_key_exists($hitShipId, $lastAction['hit'])) {
-            array_push($lastAction['hit'][$hitShipId]['hit'], $hitShipId);
+            array_push(
+                $lastAction['hit'][$hitShipId]['hit'],
+                $this->findNumberOfHitElementInShip($lastAction['coordinates'], $ship)
+            );
             return;
         }
 

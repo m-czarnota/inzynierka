@@ -8,6 +8,7 @@ use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\User;
 use App\Service\GameServeActionPlayer;
 use App\Service\GameServeListeningPlayer;
+use App\Service\GameServePlayer;
 use App\Service\MatchmakingEngine;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,33 +81,53 @@ class GameController extends AbstractController
 
     /**
      * @Route(path="/getUserShips", name="get_user_ships")
+     * @throws \Exception
      */
-    public function getUserShipsAction(): JsonResponse
+    public function getUserShipsAction(GameServePlayer $gameServePlayer): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
         $game = $user->getGame();
 
-        $turnFlag = array_search($user, $game->getUsers()->getValues());
-        $gameShips = $user->getGame()->getGameInfo();
-        $userShips = $gameShips[$turnFlag];
+        $turnFlag = $gameServePlayer->getUserPositionInQueue();
+        $gameInfo = $user->getGame()->getGameInfo();
+
+        // remove opponent ships from game info and get user ships
+        array_splice($gameInfo, (int)!$turnFlag, 1);
+        $userShips = array_shift($gameInfo)['ships'];
+
+        foreach ($gameInfo as &$info) {
+            if ($info['status'] !== GameResponseStatusEnum::KILLED || $info['userAction'] !== $user->getId()) {
+                continue;
+            }
+
+            $killedShipsIds = $info['killed'];
+            $shipCoordinates = $gameServePlayer->getCoordinatesForShipById($killedShipsIds[count($killedShipsIds) - 1], true);
+            $info['boardFields'] = $shipCoordinates['boardFields'];
+            $info['aroundFields'] = $shipCoordinates['aroundFields'];
+        }
 
         return new JsonResponse([
             'ships' => $userShips,
+            'actions' => $gameInfo,
             'turnFlag' => $turnFlag,
             'yourTurn' => $game->getPlayerTurn() === $turnFlag,
-            'playerTurn' => $turnFlag === $game->getPlayerTurn(),
+            'yourId' => $user->getId(),
         ]);
     }
 
     /**
      * @Route (path="/serveListeningPlayer", name="serve_listening_player")
+     * @throws \Exception
      */
     public function serveListeningPlayerAction(Request $request, GameServeListeningPlayer $serveListeningPlayer): JsonResponse
     {
         $data = $serveListeningPlayer->serveAction();
 
-        return new JsonResponse($data, $data['status'] !== GameResponseStatusEnum::ERROR ? Response::HTTP_OK : Response::HTTP_CONFLICT);
+        return new JsonResponse(
+            $data,
+            $data['status'] !== GameResponseStatusEnum::ERROR ? Response::HTTP_OK : Response::HTTP_CONFLICT
+        );
     }
 
     /**
@@ -120,7 +141,10 @@ class GameController extends AbstractController
         ];
         $data = $serveActionPlayer->serveAction($dataFromPlayer);
 
-        return new JsonResponse($data);
+        return new JsonResponse(
+            $data,
+            $data['status'] !== GameResponseStatusEnum::ERROR ? Response::HTTP_OK : Response::HTTP_CONFLICT
+        );
     }
 
     /**

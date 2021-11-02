@@ -14,7 +14,6 @@
 }
 
 .inactive {
-  background-color: $board-cell-background-disable;
   cursor: default;
 
   &.hit {
@@ -28,4 +27,12 @@
   &.miss {
     background-color: $board-cell-miss-background;
   }
+}
+
+.ship-element {
+  background-color: $ship-element-background;
+}
+
+.next-to-ship {
+  background-color: $board-cell-next-to-ship-background;
 }

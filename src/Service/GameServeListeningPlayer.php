@@ -5,8 +5,11 @@ namespace App\Service;
 use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
 
-class GameServeListeningPlayer extends AbstractGameServePlayer
+class GameServeListeningPlayer extends GameServePlayer
 {
+    /**
+     * @throws \Exception
+     */
     public function serveAction(): array
     {
         /** @var User $user */
@@ -18,26 +21,34 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
                 'status' => GameResponseStatusEnum::ERROR,
                 'message' => $this->translator->trans('game.gameActions.responses.notInGame'),
             ];
-            // Response::HTTP_BAD_REQUEST
         }
 
         return $this->serveWaitingLastAction();
     }
 
+    /**
+     * @throws \Exception
+     */
     private function serveWaitingLastAction(): array
     {
         $dataToReturn = [
             'status' => GameResponseStatusEnum::NO_CHANGED,
             'message' => $this->translator->trans('game.gameActions.responses.waiting'),
+            'yourTurn' => $this->isYourTurn(),
+            'userAction' => $this->getOpponent()->getId(),
         ];
 
         $lastAction = $this->getLastOpponentAction();
-        if (!$lastAction || $lastAction['isReading']) {
+        if (!$lastAction || $lastAction['isReading'] === true) {
             return $dataToReturn;
         }
 
-        $hitShipId = $this->getHitShipIdByCoordinatesFromLastAction();
-        if (!$hitShipId) {
+        $dataToReturn['coordinates'] = $lastAction['coordinates'];
+        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo(), $lastAction['coordinates']);
+
+        $this->markActionAsRead($lastAction);
+
+        if ($hitShipId === null) {
             $dataToReturn['status'] = GameResponseStatusEnum::MISS_HIT;
             $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.miss_hit');
             return $dataToReturn;
@@ -46,23 +57,15 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         if ($this->isShipKilledInAction($lastAction, $hitShipId)) {
             $dataToReturn['status'] = GameResponseStatusEnum::KILLED;
             $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.killed');
+
+            $shipCoordinates = $this->getCoordinatesForShipById($hitShipId);
+            $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
+            $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
             return $dataToReturn;
         }
 
         $dataToReturn['status'] = GameResponseStatusEnum::HIT;
         $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.hit');
-
-        /** @var User $user */
-        $user = $this->security->getUser();
-        $game = $user->getGame();
-
-        $lastAction['isReading'] = true;
-        $gameInfo = $game->getGameInfo();
-        $gameInfo[$lastAction['positionInGameInfo']] = $lastAction;
-        $game->setGameInfo($gameInfo);
-
-        $this->em->persist($game);
-        $this->em->flush();
 
         if ($endGameData = $this->getEndGameData()) {
             return $endGameData;
@@ -71,28 +74,8 @@ class GameServeListeningPlayer extends AbstractGameServePlayer
         return $dataToReturn;
     }
 
-    private function getHitShipIdByCoordinatesFromLastAction(): ?int
-    {
-        $lastAction = $this->getLastOpponentAction();
-
-        foreach ($this->getUserShipsInfo() as $ship) {
-            if ($lastAction !== null || in_array($ship['id'], $lastAction['killed'])) {
-                continue;
-            }
-
-            foreach ($ship['boardFields'] as $boardField) {
-                if ($boardField['coordinates'] === $lastAction['coordinates']) {
-                    return $ship['id'];
-                }
-            }
-        }
-
-        return null;
-    }
-
     private function isShipKilledInAction($action, int $shipId): bool
     {
-        $hitShips = $action['hit'][$shipId];
-        return count($hitShips['hit']) === $hitShips['elementsCount'];
+        return in_array($shipId, $action['killed']);
     }
 }

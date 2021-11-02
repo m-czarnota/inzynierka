@@ -17,7 +17,6 @@ export default {
         return {
             id: id++,
             disable: this.disableProps,
-            lastShotCoordinates: null,
         };
     },
     props: ['disableProps', 'isUserOwner'],
@@ -39,15 +38,14 @@ export default {
         },
         turnOn() {
             this.$refs["board-cell"].classList.remove('disabled');
-            this.$refs["board-cell"].addEventListener("click", this.shot);
+            this.$refs["board-cell"].onclick = this.shot;
         },
         turnOff() {
             this.$refs["board-cell"].classList.add('disabled');
-            this.$refs["board-cell"].removeEventListener("click", this.shot);
+            this.$refs["board-cell"].onclick = null;
         },
         async shot(event) {
             const shotCoordinates = this.$parent.$props.board.getFieldByHtmlElement(event.target).coordinates;
-            this.lastShotCoordinates = shotCoordinates;
 
             const formData = new FormData();
             formData.append('action', requestStatuses.shot);
@@ -59,47 +57,8 @@ export default {
             });
             const data = await response.json();
 
-            this.actionAfterShot(data);
+            serveResponseRequestHelper.serveAction(data, this.getBoard());
         },
-        actionAfterShot(data) {
-            console.log(data.message);
-            switch (data.status) {
-                case responseStatuses.error:
-                    console.error(data.message);
-                    break;
-                case responseStatuses.hit:
-                    this.serveHit();
-                    break;
-                case responseStatuses.killed:
-                    this.serveKill();
-                    break;
-                case responseStatuses.miss_hit:
-                    this.serveMissHit();
-                    break;
-                case responseStatuses.end_game:
-                    this.actionAfterShot(data.originalAction);
-                    serveResponseRequestHelper.serveEndGame(data);
-                    break;
-                case responseStatuses.walkover:
-                    serveResponseRequestHelper.serveWalkover(data);
-                    break;
-            }
-        },
-        serveHit() {
-            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
-            field.setHitStatus();
-        },
-        serveKill() {
-            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
-            const ship = this.getBoard().ships.find(ship => ship === field.shipPointer);
-            ship.setKilledStatus();
-        },
-        serveMissHit() {
-            const field = this.getBoard().getFieldByCoordinates(this.lastShotCoordinates);
-            field.setMisHitStatus();
-
-            setTimeout(() => gameState.changeTurn(), 1000);
-        }
     },
     watch: {
         disable(newVal) {

@@ -1,5 +1,5 @@
 <template>
-    <div class="game-component">
+    <div class="game-component d-none">
         <div class="game-boards d-flex">
             <div class="player col-6" id="user">
                 <board-component :board="boardUser" :is-user-owner="true"></board-component>
@@ -42,12 +42,15 @@ export default {
             userShips.value = data.ships;
             userShips.value.forEach(ship => boardUser.ships.push(Ship.createInstanceFromParsedObject(ship, boardUser)));
             dragDropShipHelper.board = boardUser;
-            dragDropShipHelper.setAppropriateColorForAllFields();
+            dragDropShipHelper.setAppropriateColorForAllFields(true);
 
+            gameState.yourId = data.yourId;
+            applyAllPreviousActions(data.actions, boardUser, boardOpponent);
             gameState.turnFlag = data.turnFlag;
-            gameState.changeTurn(data.yourTurn);
+            gameState.setTurn(data.yourTurn);
+            document.querySelector('.game-component').classList.remove('d-none');
 
-            // listenForResponse(boardUser);
+            listenForResponse(boardUser);
         });
 
         return {
@@ -60,7 +63,7 @@ export default {
 }
 
 const listenForResponse = (board) => {
-    setInterval(async () => {
+    const listener = async () => {
         const response = await fetch(gameRouter.gameRoutes.serveListeningPlayer);
         const data = await response.json();
 
@@ -69,32 +72,27 @@ const listenForResponse = (board) => {
             return;
         }
 
-        serveAction(data, board);
-    }, 1000);
+        serveResponseRequestHelper.serveAction(data, board);
+    }
+
+    listener();
+    // setInterval(listener, 1000);
 };
 
-const serveAction = (data, board) => {
-    switch (data.status) {
-        case responseStatuses.error:
-            console.error(data.message);
-            break;
-        case responseStatuses.hit:
-            serveResponseRequestHelper.serveHitResponse(data, board);
-            break;
-        case responseStatuses.killed:
-            serveResponseRequestHelper.serveKillResponse(data, board);
-            break;
-        case responseStatuses.miss_hit:
-            serveResponseRequestHelper.serveMissHitResponse(data);
-            gameState.changeTurn();
-            break;
-        case responseStatuses.end_game:
-            serveResponseRequestHelper.serveEndGame(data);
-            break;
-        case responseStatuses.walkover:
-            serveResponseRequestHelper.serveWalkover(data);
-            break;
+const applyAllPreviousActions = (actions, boardUser, boardOpponent) => {
+    const applyPreviousAction = (action) => {
+        if (!action['isReading'] && action['userAction'] !== gameState.yourId) {
+            return;
+        }
+
+        action['userAction'] === gameState.yourId ?
+            serveResponseRequestHelper.serveAction(action, boardOpponent) :
+            serveResponseRequestHelper.serveAction(action, boardUser);
     }
+
+    gameState.applyingMovesAfterLoad = true;
+    actions.forEach(action => applyPreviousAction(action));
+    gameState.applyingMovesAfterLoad = false;
 }
 </script>
 

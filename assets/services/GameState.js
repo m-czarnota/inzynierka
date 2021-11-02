@@ -8,9 +8,12 @@ class GameState {
         this.isActiveGame = false;
         this.kindOfGame = null;
         this.gameInfoStorageKey = 'gameInfo';
+        this.displayMessages = true;
+        this.applyingMovesAfterLoad = false;
 
         this.turnFlag = null;
         this.yourTurn = false;
+        this.yourId = null;
 
         this.loadFromStorage();
     }
@@ -39,9 +42,30 @@ class GameState {
         }));
     }
 
+    setTurn(turnFlag) {
+        if (this.applyingMovesAfterLoad) {
+            return;
+        }
+
+        if (turnFlag === undefined || turnFlag === null) {
+            throw new Error('Turn flag must be true or false');
+        }
+
+        this.yourTurn = turnFlag;
+        emitter.emit('yourTurn', this.yourTurn);
+    }
+
     changeTurn(turnFlag = null) {
+        if (this.applyingMovesAfterLoad) {
+            return;
+        }
+
+        if (turnFlag === this.yourTurn) {
+            return;
+        }
+
         this.yourTurn = turnFlag ?? !this.yourTurn;
-        emitter.emit('yourTurn', gameState.yourTurn);
+        emitter.emit('yourTurn', this.yourTurn);
     }
 }
 

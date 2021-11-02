@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GameRoomRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
@@ -37,14 +39,16 @@ class GameRoom
     private $game;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="gameRoom")
      */
-    private array $users = [];
+    private $users;
+
 
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -93,14 +97,32 @@ class GameRoom
         return $this;
     }
 
-    public function getUsers(): ?array
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
     {
         return $this->users;
     }
 
-    public function setUsers(array $users): self
+    public function addUser(User $user): self
     {
-        $this->users = $users;
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setGameRoom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getGameRoom() === $this) {
+                $user->setGameRoom(null);
+            }
+        }
 
         return $this;
     }

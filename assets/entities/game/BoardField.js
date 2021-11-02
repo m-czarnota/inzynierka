@@ -37,8 +37,12 @@ export class BoardField {
         }
 
         // TODO better styles assign
-        this.htmlElement.style.backgroundColor = 'grey';
         this.htmlElement.style.cursor = 'default';
+        if (this.shipPointer) {
+            this.htmlElement.classList.add('ship-element');
+        } else if (this.isNextToShipPointers.includes(shipPointer.id)) {
+            this.htmlElement.classList.add('next-to-ship-pointer');
+        }
     }
 
     unblockField(shipPointer) {
@@ -47,10 +51,11 @@ export class BoardField {
 
         this.numberOfShipElement = -1;
         this.htmlElement.removeAttribute('draggable');
+        this.htmlElement.classList.remove('ship-element');
 
         if (!this.isNextToShipPointers.length) {
             this.isActive = true;
-            this.htmlElement.style.backgroundColor = '';
+            this.htmlElement.classList.remove('next-to-ship');
             this.htmlElement.style.cursor = '';
         }
     }
@@ -59,6 +64,7 @@ export class BoardField {
         this.isHit = withHit;
         this.htmlElement.classList.remove('active');
         this.htmlElement.classList.add('inactive');
+        this.htmlElement.onclick = null;
     }
 
     setMisHitStatus() {
@@ -67,29 +73,18 @@ export class BoardField {
     }
 
     setHitStatus() {
-        if (this.shipPointer === -1) {
-            return;
-        }
-
         this.setShotStatus();
         this.htmlElement.classList.add('hit');
     }
 
     setKilledStatus() {
-        if (this.numberOfShipElement === -1) {
-            return;
-        }
-
         this.setShotStatus();
         this.htmlElement.classList.add('killed');
     }
 
     setInactiveStatus() {
-        if (this.isNextToShipPointers.length === 0 || this.isHit === false) {
-            return;
-        }
-
         this.setShotStatus(false);
+        this.htmlElement.classList.add('next-to-ship');
     }
 
     remove() {
