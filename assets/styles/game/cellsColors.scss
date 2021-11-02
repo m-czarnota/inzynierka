@@ -1,0 +1,38 @@
+@import "palette";
+
+.active {
+  background-color: $board-cell-background;
+
+  &:hover {
+    background-color: $board-cell-background-hover;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.inactive {
+  cursor: default;
+
+  &.hit {
+    background-color: $ship-element-hit-background;
+  }
+
+  &.killed {
+    background-color: $ship-element-kill-background;
+  }
+
+  &.miss {
+    background-color: $board-cell-miss-background;
+  }
+}
+
+.ship-element {
+  background-color: $ship-element-background;
+}
+
+.next-to-ship {
+  background-color: $board-cell-next-to-ship-background;
+}

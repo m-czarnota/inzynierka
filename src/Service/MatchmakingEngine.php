@@ -97,21 +97,13 @@ class MatchmakingEngine
         $gameRoom->setIsActive(true);
 
         $userInMatchmaking = $this->matchmakingStorageRepository->findOneMatchmakingByUser($user);
-        $game->setGameInfo([
-            $userInMatchmaking->getShips(),
-            $this->matchmakingStorageRepository->findOneMatchmakingByUser($opponent)->getShips()
-        ]);
         $game->setKindOfGame($userInMatchmaking->getKindOfGame());
 
         $players = [$user, $opponent];
-        $gameRoom->setUsers($players);
-        $game->setUsers($players);
 
         $gameRoom->setGame($game);
         $game->setGameRoom($gameRoom);
-
-        $this->em->persist($gameRoom);
-        $this->em->persist($game);
+        $game->setPlayerTurn(rand(0, 1));
 
         foreach ($players as &$player) {
             $player->setGameRoom($gameRoom);
@@ -120,6 +112,21 @@ class MatchmakingEngine
             $this->em->persist($player);
         }
         unset($player);
+
+        $this->em->persist($gameRoom);
+        $this->em->persist($game);
+
+        $gameInfo = [];
+        foreach ($players as &$player) {
+            $ships = $this->matchmakingStorageRepository->findOneMatchmakingByUser($player)->getShips();
+            $ships = [
+                'userId' => $player->getId(),
+                'ships' => $ships,
+            ];
+            $gameInfo[] = $ships;
+        }
+        unset($player);
+        $game->setGameInfo($gameInfo);
 
         $this->em->flush();
 

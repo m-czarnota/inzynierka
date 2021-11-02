@@ -1,5 +1,3 @@
-import {board} from "./Board";
-
 const $ = require("jquery");
 
 let id = 0;
@@ -61,6 +59,21 @@ export class Ship {
         if (this.actualPose < 0) {
             this.actualPose = 0;
         }
+    }
+
+    setKilledStatus() {
+        this.boardFields.forEach(field => {
+            field.setKilledStatus();
+
+            if (!this.hitElements.includes(field)) {
+                this.hitElements.push(field);
+            }
+        });
+        this.aroundFields.forEach(field => field.setInactiveStatus());
+    }
+
+    isKilled() {
+        return this.hitElements.length === this.elementsCount;
     }
 
     static createInstanceFromParsedObject(parsedShip, board) {

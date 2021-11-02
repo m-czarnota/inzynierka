@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\Enums\GameStateEnum;
-use App\Entity\Enums\KindOfGameEnum;
 use App\Repository\GameRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
@@ -30,11 +30,6 @@ class Game
     private $gameRoom;
 
     /**
-     * @ORM\Column(type="json")
-     */
-    private $users = [];
-
-    /**
      * @ORM\Column(type="integer", nullable=true)
      * @var int
      */
@@ -47,9 +42,20 @@ class Game
     private int $gameState;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     * @var int
+     */
+    private int $playerTurn;
+
+    /**
      * @ORM\Column(type="json")
      */
     private $gameInfo = [];
+
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="game")
+     */
+    private Collection $users;
 
     public function __construct()
     {
@@ -71,18 +77,6 @@ class Game
     public function setGameRoom(GameRoom $gameRoom): self
     {
         $this->gameRoom = $gameRoom;
-
-        return $this;
-    }
-
-    public function getUsers(): ?array
-    {
-        return $this->users;
-    }
-
-    public function setUsers(array $users): self
-    {
-        $this->users = $users;
 
         return $this;
     }
@@ -119,6 +113,52 @@ class Game
     public function setGameInfo(array $gameInfo): self
     {
         $this->gameInfo = $gameInfo;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPlayerTurn(): int
+    {
+        return $this->playerTurn;
+    }
+
+    /**
+     * @param int $playerTurn
+     */
+    public function setPlayerTurn(int $playerTurn): void
+    {
+        $this->playerTurn = $playerTurn;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getGame() === $this) {
+                $user->setGame(null);
+            }
+        }
 
         return $this;
     }

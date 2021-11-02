@@ -57,6 +57,10 @@ export class Board {
         return this.fields[row][column];
     }
 
+    getFieldByHtmlElement(htmlElement) {
+        return this.fields.flat().find(field => field.htmlElement === htmlElement);
+    }
+
     remove() {
         this.fields.forEach(row => {
             row.forEach(field => field.remove());

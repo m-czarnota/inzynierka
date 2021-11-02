@@ -186,7 +186,7 @@ class DragDropShipHelper {
             shipField.shipPointer = ship.id;
             shipField.blockField(ship);
             shipField.numberOfShipElement = index + 1;
-            shipField.htmlElement.style.backgroundColor = 'red';
+            shipField.htmlElement.classList.add('ship-element');
             ship.boardFields.push(shipField);
         });
 
@@ -278,15 +278,15 @@ class DragDropShipHelper {
     /**
      * Sets appropriate color for fields depending on the their actual state and membership.
      */
-    setAppropriateColorForAllFields() {
+    setAppropriateColorForAllFields(missAround = false) {
         // TODO better colors
         for (let field of this.board.fields.flat()) {
             if (field.shipPointer !== null) {
-                field.htmlElement.style.backgroundColor = 'red';
-            } else if (field.isNextToShipPointers.length) {
-                field.htmlElement.style.backgroundColor = 'grey';
+                field.htmlElement.classList.add('ship-element');
+            } else if (field.isNextToShipPointers.length && missAround === false) {
+                field.htmlElement.classList.add('next-to-ship');
             } else {
-                field.htmlElement.style.backgroundColor = 'hsl(140, 25%, 68%)';
+                field.htmlElement.classList.remove('ship-element', 'next-to-ship');
             }
         }
     }
@@ -333,9 +333,9 @@ class DragDropShipHelper {
             shipMovingProperty.shipElements.forEach((shipElement) => {
                 const boardField = this.board.getFieldForShipElement(shipMovingProperty, shipElement);
 
-                if (boardField.isActive) {
-                    boardField.htmlElement.style.backgroundColor = addColor ? color : '';
-                }
+                // if (boardField.isActive) {
+                //     boardField.htmlElement.style.backgroundColor = addColor ? color : '';
+                // }
             });
         }
     }
