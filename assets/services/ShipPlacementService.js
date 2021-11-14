@@ -3,6 +3,7 @@ import {shipsStorage} from "../entities/game/ShipsStorage";
 import {dragDropShipHelper} from "./DragDropShipHelper";
 import {Ship} from "../entities/game/Ship";
 import {gameState} from "./GameState";
+import {emitter} from "./Emitter";
 
 class ShipPlacementService {
     constructor() {
@@ -52,6 +53,25 @@ class ShipPlacementService {
             yield key;
             key -= 1;
         }
+    }
+
+    putAllShipsToStorage() {
+        for (let index of this.reverseKeys(board.ships)) {
+            const ship = board.ships[index];
+            this.putShipToStorage(ship);
+        }
+
+        emitter.emit('refreshBoard', true);
+    }
+
+    putShipToStorage(ship) {
+        shipPlacementService.defineCustomEvent(
+            document.querySelector('.ships-storage-component'),
+            ship,
+            1
+        );
+        shipPlacementService.customEvent.dataTransfer.dragFromBoard = true;
+        dragDropShipHelper.storageOnDrop(shipPlacementService.customEvent);
     }
 
     autoPlaceAllShips() {

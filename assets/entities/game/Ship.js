@@ -111,4 +111,20 @@ export class Ship {
         this.boardFields.forEach(field => field.remove());
         delete this;
     }
+
+    clean() {
+        this.boardFields.forEach(boardField => {
+            boardField.numberOfShipElement = -1;
+            boardField.shipPointer = null;
+            boardField.htmlElement.removeAttribute('draggable');
+            boardField.isActive = true;
+        });
+        this.boardFields = [];
+
+        this.aroundFields.forEach(aroundField => {
+            aroundField.isNextToShipPointers.splice(aroundField.isNextToShipPointers.indexOf(this.id), 1);
+            aroundField.isActive = true;
+        });
+        this.aroundFields = [];
+    }
 }

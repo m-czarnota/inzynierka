@@ -20,6 +20,7 @@ import {board} from "../../entities/game/Board";
 import {shipPlacementService} from "../../services/ShipPlacementService";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameRouter} from "../../services/GameRouter";
+import {kindsOfGame} from "../../loaders/appGame";
 
 export default {
     name: "ArrangeComponent",
@@ -59,6 +60,12 @@ export default {
             formData.append('kindOfGame', gameState.kindOfGame);
             formData.append('playerShips', shipPlacementService.stringifyShips(board.ships));
             formData.append('whichApproach', this.whichApproach);
+
+            if ([kindsOfGame.game_ai, kindsOfGame.game_ai_ranked].includes(gameState.kindOfGame)) {
+                shipPlacementService.putAllShipsToStorage();
+                shipPlacementService.autoPlaceAllShips();
+                formData.append('aiShips', shipPlacementService.stringifyShips(board.ships));
+            }
 
             const prepareGame = async () => {
                 try {

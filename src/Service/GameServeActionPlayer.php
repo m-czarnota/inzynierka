@@ -4,12 +4,25 @@ namespace App\Service;
 
 use App\Entity\Enums\GameRequestStatusEnum;
 use App\Entity\Enums\GameResponseStatusEnum;
+use App\Entity\Enums\KindOfGameEnum;
+use App\Entity\Game;
 use App\Entity\User;
 use http\Exception\RuntimeException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class GameServeActionPlayer extends GameServePlayer
 {
+//    private GameServeAiAction $gameServeAiAction;
+//
+//    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator, GameServeAiAction $gameServeAiAction)
+//    {
+//        parent::__construct($em, $security, $translator);
+//        $this->gameServeAiAction = $gameServeAiAction;
+//    }
+
+    /**
+     * @throws \Exception
+     */
     public function serveAction(array $data): array
     {
         /** @var User $user */
@@ -47,7 +60,7 @@ class GameServeActionPlayer extends GameServePlayer
             'status' => GameResponseStatusEnum::MISSED_TURN,
             'message' => '',
             'yourTurn' => $this->isYourTurn(),
-            'userAction' => $this->security->getUser()->getId(),
+            'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
         ];
     }
 
@@ -60,17 +73,21 @@ class GameServeActionPlayer extends GameServePlayer
             'status' => GameResponseStatusEnum::MISS_HIT,
             'message' => $this->translator->trans('game.gameActions.requests.miss_hit'),
             'yourTurn' => $this->isYourTurn(),
-            'userAction' => $this->security->getUser()->getId(),
+            'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
             'coordinates' => $data['coordinates'],
         ];
 
-        $previousAction = $this->getLastOpponentAction(true);
-        $lastAction = $previousAction ?? $this->generateEmptyLastAction();
+        $userMove = !array_key_exists('ai_move', $data);
+        $previousAction = $this->getLastOpponentAction($userMove);
+
+        $lastAction = $previousAction ?? $this->generateEmptyLastAction($userMove);
         $lastAction['isReading'] = false;
         $lastAction['positionInGameInfo'] = count($this->getGameInfo());
         $lastAction['coordinates'] = $data['coordinates'];
 
-        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo(true), $data['coordinates']);
+        $dataToReturn['userAction'] = $lastAction['userAction'];
+
+        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo($userMove), $data['coordinates']);
 
         if ($hitShipId !== null) {
             $isKilledHitShip = $this->isKilledHitShip($hitShipId);
@@ -83,7 +100,7 @@ class GameServeActionPlayer extends GameServePlayer
             if ($isKilledHitShip) {
                 array_push($lastAction['killed'], $hitShipId);
 
-                $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, true);
+                $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, $userMove);
                 $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
                 $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
             }
@@ -92,6 +109,19 @@ class GameServeActionPlayer extends GameServePlayer
         } else {
             array_push($lastAction['mishits'], $data['coordinates']);
             $lastAction['status'] = GameResponseStatusEnum::MISS_HIT;
+        }
+
+        if (
+            array_key_exists('ai_move', $data) &&
+            $lastAction['status'] !== GameResponseStatusEnum::KILLED &&
+            (
+                $previousAction['status'] === GameResponseStatusEnum::HUNTED ||
+                $previousAction['status'] === GameResponseStatusEnum::HUNTED_AND_HIT ||
+                $previousAction['status'] === GameResponseStatusEnum::HIT
+            )
+        ) {
+            $newStatus = $lastAction['status'] === GameResponseStatusEnum::HIT ? GameResponseStatusEnum::HUNTED_AND_HIT : GameResponseStatusEnum::HUNTED;
+            $lastAction['status'] = $newStatus;
         }
 
         $this->saveLastAction($lastAction);
@@ -103,6 +133,12 @@ class GameServeActionPlayer extends GameServePlayer
         if ($lastAction['status'] === GameResponseStatusEnum::MISS_HIT) {
             $this->changeTurn();
             $dataToReturn['yourTurn'] = $this->isYourTurn();
+
+            /** @var Game $game */
+            $game = $this->security->getUser()->getGame();
+            if (in_array($game->getKindOfGame(), [KindOfGameEnum::GAME_AI, KindOfGameEnum::GAME_AI_RANKED])) {
+                $this->gameServeAiAction->serveAction();
+            }
         }
 
         return $dataToReturn;

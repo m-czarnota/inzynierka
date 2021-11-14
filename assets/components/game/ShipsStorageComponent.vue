@@ -12,7 +12,6 @@
 import ShipComponent from "./ShipComponent";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {emitter} from "../../services/Emitter";
-import {board} from "../../entities/game/Board";
 import {shipsStorage} from "../../entities/game/ShipsStorage";
 
 export default {
@@ -25,21 +24,7 @@ export default {
     },
     methods: {
         onDrop(event) {
-            if (!event.dataTransfer.getData('dragFromBoard')) {
-                return;
-            }
-
-            const dataTransfer = dragDropShipHelper.getDataTransfer(event);
-            const ship = board.findShipById(dataTransfer.shipId);
-
-            clearTimeout(ship.timerToRestoreShipOnLastPosition);
-            // ship.actualPoseDecrement();
-
-            shipsStorage.ships.push(ship);
-            board.ships.splice(board.ships.indexOf(ship), 1);
-
-            dragDropShipHelper.removeShipHtml(ship);
-
+            dragDropShipHelper.storageOnDrop(event);
             setTimeout(() => this.$forceUpdate(), 100);
         },
     },

@@ -21,6 +21,7 @@ import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {BoardField} from "../../entities/game/BoardField";
 import {board} from "../../entities/game/Board";
 import {shipPlacementService} from "../../services/ShipPlacementService";
+import {emitter} from "../../services/Emitter";
 
 export default {
     name: "BoardComponent",
@@ -40,6 +41,10 @@ export default {
         this.fillBoard();
 
         this.board.wasFirstMount = true;
+
+        emitter.on('refreshBoard', isRefresh => {
+            isRefresh ? this.$forceUpdate : '';
+        })
     },
     setup(props) {
         return {

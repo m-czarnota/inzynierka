@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -12,12 +13,14 @@ class GameServePlayer
     protected EntityManagerInterface $em;
     protected Security $security;
     protected TranslatorInterface $translator;
+    protected ParameterBagInterface $parameterBag;
 
-    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator)
+    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
         $this->em = $em;
         $this->security = $security;
         $this->translator = $translator;
+        $this->parameterBag = $parameterBag;
 
         $lastActionData = [
             'userAction' => 'user',
@@ -82,7 +85,8 @@ class GameServePlayer
         $user = $userRepository->find($userId);
 
         if ($user === null) {
-            throw new \Exception("User with ID $userId has been not found in game users!");
+            $user = new User();
+            $user->setId($this->parameterBag->get('ai_id'));
         }
 
         return $user;
@@ -172,14 +176,14 @@ class GameServePlayer
         return null;
     }
 
-    public function generateEmptyLastAction(): array
+    public function generateEmptyLastAction(bool $forUser = true): array
     {
         /** @var User $user */
         $user = $this->security->getUser();
         $game = $user->getGame();
 
         return [
-            'userAction' => $user->getId(),
+            'userAction' => $forUser ? $user->getId() : $this->parameterBag->get('ai_id'),
             'status' => null,
             'coordinates' => null,
             'hit' => [],
@@ -247,7 +251,7 @@ class GameServePlayer
 
         $ship = $this->findShipByIdInUserShips($shipId, $forOpponent);
         if ($ship === null) {
-            throw new \Exception("Ship with ID $shipId has been not found for " . ($forOpponent ? 'opponent' : 'user'));
+            throw new \Exception("Ship with ID $shipId has not been found for " . ($forOpponent ? 'opponent' : 'user'));
         }
 
         foreach ($ship['boardFields'] as $boardField) {

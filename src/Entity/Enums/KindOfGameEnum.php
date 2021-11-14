@@ -15,10 +15,6 @@ class KindOfGameEnum
     {
         $kindOfGame = filter_var($kindOfGame, FILTER_VALIDATE_INT);
 
-        if (!$kindOfGame) {
-            return false;
-        }
-
         return in_array($kindOfGame, self::serialize());
     }
 

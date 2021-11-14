@@ -371,6 +371,24 @@ class DragDropShipHelper {
             shipSelectedElement: shipSelectedElement
         };
     }
+
+    storageOnDrop(event) {
+        if (!event.dataTransfer.getData('dragFromBoard')) {
+            return;
+        }
+
+        const dataTransfer = this.getDataTransfer(event);
+        const ship = board.findShipById(dataTransfer.shipId);
+
+        clearTimeout(ship.timerToRestoreShipOnLastPosition);
+        // ship.actualPoseDecrement();
+
+        shipsStorage.ships.push(ship);
+        board.ships.splice(board.ships.indexOf(ship), 1);
+
+        this.removeShipHtml(ship);
+        ship.clean();
+    }
 }
 
 export const dragDropShipHelper = new DragDropShipHelper();

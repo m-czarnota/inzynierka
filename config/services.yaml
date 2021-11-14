@@ -7,6 +7,7 @@ parameters:
   email_recipient: 'niezwyciezona.jedynka@gmail.com'
   email_sender: 'niezwyciezona.jedynka@gmail.com'
   board_size: 10
+  ai_id: -100
 
 services:
   # default configuration for services in *this* file
