@@ -41,7 +41,7 @@ export class BoardField {
         if (this.shipPointer) {
             this.htmlElement.classList.add('ship-element');
         } else if (this.isNextToShipPointers.includes(shipPointer.id)) {
-            this.htmlElement.classList.add('next-to-ship-pointer');
+            this.htmlElement.classList.add('next-to-ship');
         }
     }
 

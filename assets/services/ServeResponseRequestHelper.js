@@ -33,18 +33,18 @@ class ServeResponseRequestHelper {
             case responseStatuses.error:
                 console.error(this.data.message);
                 break;
+            case responseStatuses.hunted_and_hit:
             case responseStatuses.hit:
                 this.serveHit();
                 break;
             case responseStatuses.killed:
                 this.serveKill();
                 break;
+            case responseStatuses.hunted:
             case responseStatuses.miss_hit:
                 this.serveMissHit();
                 break;
         }
-
-
     }
 
     serveHit() {

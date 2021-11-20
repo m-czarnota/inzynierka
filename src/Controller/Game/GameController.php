@@ -50,6 +50,7 @@ class GameController extends AbstractController
         $opponent = $matchmakingEngine->searchOpponent($user, [
             'kindOfGame' => $kindOfGame,
             'ships' => $request->get('playerShips'),
+            'aiShips' => $request->get('aiShips'),
         ], $request->get('whichApproach'));
         if (!$opponent) {
             return new JsonResponse([
@@ -132,6 +133,7 @@ class GameController extends AbstractController
 
     /**
      * @Route (path="/servePlayerMove", name="serve_player_move", methods={"POST"})
+     * @throws \Exception
      */
     public function servePlayerMoveAction(Request $request, GameServeActionPlayer $serveActionPlayer): JsonResponse
     {

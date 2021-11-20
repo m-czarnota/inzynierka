@@ -5,11 +5,23 @@ namespace App\Service;
 use App\Entity\Enums\GameRequestStatusEnum;
 use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use http\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class GameServeActionPlayer extends GameServePlayer
 {
+    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator, ParameterBagInterface $parameterBag)
+    {
+        parent::__construct($em, $security, $translator, $parameterBag);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function serveAction(array $data): array
     {
         /** @var User $user */
@@ -47,7 +59,7 @@ class GameServeActionPlayer extends GameServePlayer
             'status' => GameResponseStatusEnum::MISSED_TURN,
             'message' => '',
             'yourTurn' => $this->isYourTurn(),
-            'userAction' => $this->security->getUser()->getId(),
+            'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
         ];
     }
 
@@ -60,20 +72,24 @@ class GameServeActionPlayer extends GameServePlayer
             'status' => GameResponseStatusEnum::MISS_HIT,
             'message' => $this->translator->trans('game.gameActions.requests.miss_hit'),
             'yourTurn' => $this->isYourTurn(),
-            'userAction' => $this->security->getUser()->getId(),
+            'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
             'coordinates' => $data['coordinates'],
         ];
 
-        $previousAction = $this->getLastOpponentAction(true);
-        $lastAction = $previousAction ?? $this->generateEmptyLastAction();
+        $userMove = !array_key_exists('ai_move', $data);
+        $previousAction = $this->getLastOpponentAction($userMove);
+
+        $lastAction = $previousAction ?? $this->generateEmptyLastAction($userMove);
         $lastAction['isReading'] = false;
         $lastAction['positionInGameInfo'] = count($this->getGameInfo());
         $lastAction['coordinates'] = $data['coordinates'];
 
-        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo(true), $data['coordinates']);
+        $dataToReturn['userAction'] = $lastAction['userAction'];
+
+        $hitShipId = $this->findShipIdByCoordinates($this->getUserShipsInfo($userMove), $data['coordinates']);
 
         if ($hitShipId !== null) {
-            $isKilledHitShip = $this->isKilledHitShip($hitShipId);
+            $isKilledHitShip = $this->isKilledHitShip($hitShipId, $userMove);
             $status = $isKilledHitShip ? GameResponseStatusEnum::KILLED : GameResponseStatusEnum::HIT;
 
             $lastAction['status'] = $status;
@@ -83,15 +99,28 @@ class GameServeActionPlayer extends GameServePlayer
             if ($isKilledHitShip) {
                 array_push($lastAction['killed'], $hitShipId);
 
-                $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, true);
+                $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, $userMove);
                 $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
                 $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
             }
 
-            $this->addShipToHitInLastAction($lastAction, $hitShipId);
+            $this->addShipToHitInLastAction($lastAction, $hitShipId, $userMove);
         } else {
             array_push($lastAction['mishits'], $data['coordinates']);
             $lastAction['status'] = GameResponseStatusEnum::MISS_HIT;
+        }
+
+        if (array_key_exists('ai_move', $data)) {
+            $isHuntedMode = $previousAction !== null && in_array($previousAction['status'], [
+                    GameResponseStatusEnum::HUNTED,
+                    GameResponseStatusEnum::HUNTED_AND_HIT,
+                    GameResponseStatusEnum::HIT
+                ]);
+
+            if (($lastAction['status'] !== GameResponseStatusEnum::KILLED && $isHuntedMode) || $lastAction['status'] === GameResponseStatusEnum::HIT) {
+                $newStatus = $lastAction['status'] === GameResponseStatusEnum::HIT ? GameResponseStatusEnum::HUNTED_AND_HIT : GameResponseStatusEnum::HUNTED;
+                $lastAction['status'] = $newStatus;
+            }
         }
 
         $this->saveLastAction($lastAction);
@@ -100,7 +129,7 @@ class GameServeActionPlayer extends GameServePlayer
             return $endGameData;
         }
 
-        if ($lastAction['status'] === GameResponseStatusEnum::MISS_HIT) {
+        if (in_array($lastAction['status'], [GameResponseStatusEnum::MISS_HIT, GameResponseStatusEnum::HUNTED])) {
             $this->changeTurn();
             $dataToReturn['yourTurn'] = $this->isYourTurn();
         }
@@ -111,9 +140,9 @@ class GameServeActionPlayer extends GameServePlayer
     /**
      * @throws \Exception
      */
-    private function isKilledHitShip(int $shipId): bool
+    private function isKilledHitShip(int $shipId, bool $userMove): bool
     {
-        $ship = $this->findShipByIdInUserShips($shipId, true);
+        $ship = $this->findShipByIdInUserShips($shipId, $userMove);
         if ($ship === null) {
             return false;
         }
@@ -122,13 +151,15 @@ class GameServeActionPlayer extends GameServePlayer
             return true;
         }
 
-        $lastAction = $this->getLastOpponentAction(true);
+        $lastAction = $this->getLastOpponentAction($userMove);
         if ($lastAction === null) {
             return false;
         }
 
-        if (array_key_exists($shipId, $lastAction['hit'])
-            && count($lastAction['hit'][$shipId]['hit']) === $ship['elementsCount'] - 1) {
+        if (
+            array_key_exists($shipId, $lastAction['hit']) &&
+            count($lastAction['hit'][$shipId]['hit']) === $ship['elementsCount'] - 1
+        ) {
             return true;
         }
 
@@ -164,9 +195,9 @@ class GameServeActionPlayer extends GameServePlayer
     /**
      * @throws \Exception
      */
-    private function addShipToHitInLastAction(array &$lastAction, int $hitShipId)
+    private function addShipToHitInLastAction(array &$lastAction, int $hitShipId, bool $userMove)
     {
-        $ship = $this->findShipByIdInUserShips($hitShipId, true);
+        $ship = $this->findShipByIdInUserShips($hitShipId, $userMove);
 
         if (array_key_exists($hitShipId, $lastAction['hit'])) {
             array_push(
