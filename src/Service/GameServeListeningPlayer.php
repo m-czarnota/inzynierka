@@ -6,16 +6,20 @@ use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\Enums\KindOfGameEnum;
 use App\Entity\Game;
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class GameServeListeningPlayer extends GameServePlayer
 {
-//    private GameServeAiAction $gameServeAiAction;
-//
-//    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator, GameServeAiAction $gameServeAiAction)
-//    {
-//        parent::__construct($em, $security, $translator);
-//        $this->gameServeAiAction = $gameServeAiAction;
-//    }
+    private GameServeAiAction $gameServeAiAction;
+
+    public function __construct(EntityManagerInterface $em, Security $security, TranslatorInterface $translator, ParameterBagInterface $parameterBag, GameServeAiAction $gameServeAiAction)
+    {
+        parent::__construct($em, $security, $translator, $parameterBag);
+        $this->gameServeAiAction = $gameServeAiAction;
+    }
 
     /**
      * @throws \Exception
@@ -43,8 +47,8 @@ class GameServeListeningPlayer extends GameServePlayer
     {
         /** @var Game $game */
         $game = $this->security->getUser()->getGame();
-        if (in_array($game->getKindOfGame(), [KindOfGameEnum::GAME_AI, KindOfGameEnum::GAME_AI_RANKED])) {
-//            $this->gameServeAiAction->serveAction();
+        if (!$this->isYourTurn() && in_array($game->getKindOfGame(), [KindOfGameEnum::GAME_AI, KindOfGameEnum::GAME_AI_RANKED])) {
+            $this->gameServeAiAction->serveAction();
         }
 
         $dataToReturn = [

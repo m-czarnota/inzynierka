@@ -43,6 +43,21 @@ class GameServePlayer
         ];
     }
 
+    public function getTranslator(): TranslatorInterface
+    {
+        return $this->translator;
+    }
+
+    public function getParameterBag(): ParameterBagInterface
+    {
+        return $this->parameterBag;
+    }
+
+    public function getSecurity(): Security
+    {
+        return $this->security;
+    }
+
     /**
      * @throws \Exception
      */
@@ -108,8 +123,17 @@ class GameServePlayer
 
         $actions = [];
         $searchedOpponent = $findForUser ? $user : $this->getOpponent();
+        $usersCount = count($game->getUsers());
+        if ($usersCount < 2) {
+            $usersCount = 2;
+        }
+
         foreach ($gameInfo as $index => $action) {
-            if (in_array($index, range(0, count($game->getUsers()) - 1)) || $action['userAction'] !== $searchedOpponent->getId()) {
+            if (in_array($index, range(0, $usersCount - 1))) {
+                continue;
+            }
+            
+            if ($action['userAction'] !== $searchedOpponent->getId()) {
                 continue;
             }
 

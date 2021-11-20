@@ -5,18 +5,13 @@ namespace App\Service;
 use App\Entity\Enums\GameRequestStatusEnum;
 use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
-class GameServeAiAction extends GameServePlayer
+class GameServeAiAction
 {
     private GameServeActionPlayer $serveActionPlayer;
 
-    public function __construct(GameServeActionPlayer $serveActionPlayer, EntityManagerInterface $em, Security $security, TranslatorInterface $translator)
+    public function __construct(GameServeActionPlayer $serveActionPlayer)
     {
-        parent::__construct($em, $security, $translator);
-
         $this->serveActionPlayer = $serveActionPlayer;
     }
 
@@ -26,11 +21,11 @@ class GameServeAiAction extends GameServePlayer
     public function serveAction(): void
     {
         /** @var User $user */
-        $user = $this->security->getUser();
+        $user = $this->serveActionPlayer->getSecurity()->getUser();
         $game = $user->getGame();
 
         if (!$game) {
-            throw new \Exception($this->translator->trans('game.gameActions.requests.notInGame'));
+            throw new \Exception($this->serveActionPlayer->getTranslator()->trans('game.gameActions.requests.notInGame'));
         }
 
         $this->serveMove();
@@ -56,7 +51,7 @@ class GameServeAiAction extends GameServePlayer
      */
     private function calculateCoordinatesToShot(): string
     {
-        $lastAction = $this->getLastOpponentAction(true);
+        $lastAction = $this->serveActionPlayer->getLastOpponentAction();
         if ($lastAction === null) {
             return $this->calculateCoordinatesForFreeShot();
         }
@@ -70,7 +65,17 @@ class GameServeAiAction extends GameServePlayer
             return $this->calculateCoordinatesForFreeShot();  // change it!
         }
 
-        return $this->calculateCoordinatesForHuntedShot($lastAction['coordinates']);
+        $actions = $this->getActualHuntedActions();
+        $coordinates = '';
+
+        foreach (array_reverse($actions) as $action) {
+            $coordinates = $this->calculateCoordinatesForHuntedShot($action['coordinates']);
+            if ($coordinates !== null) {
+                break;
+            }
+        }
+
+        return $coordinates;
     }
 
     /**
@@ -89,15 +94,15 @@ class GameServeAiAction extends GameServePlayer
     /**
      * @throws \Exception
      */
-    private function calculateCoordinatesForHuntedShot(string $coordinates): string
+    private function calculateCoordinatesForHuntedShot(string $coordinates): ?string
     {
         $letter = substr($coordinates, 0, 1);
         $number = (int)substr($coordinates, 1);
-        $boardSize = $this->parameterBag->get('board_size');
+        $boardSize = $this->serveActionPlayer->getParameterBag()->get('board_size');
 
         $letterMoves = [
-            'up' => -$boardSize,
-            'down' => $boardSize,
+            'up' => -1,
+            'down' => 1,
             'none' => 0
         ];
         $numberMoves = [
@@ -108,17 +113,28 @@ class GameServeAiAction extends GameServePlayer
 
         $unavailableCoordinates = $this->getUnavailableCoordinates(true);
 
-        do {
-            $newLetter = chr(ord($letter) - $letterMoves[array_keys($letterMoves)[rand(0, count($letterMoves) - 1)]]);
-            $newNumber = $number - $numberMoves[array_keys($numberMoves)[rand(0, count($numberMoves) - 1)]];
+        // TODO more random!
+        foreach ($letterMoves as $letterMove) {
+            foreach ($numberMoves as $numberMove) {
+                $newLetter = chr(ord($letter) + $letterMove);
+                $newNumber = $newLetter === $letter ? ($number + $numberMove) : $number;
 
-            $isLetterInBoardBorder = $newLetter >= ord('A') && $newLetter <= (ord('A') + $boardSize);
-            $isNumberInBoardBorder = $newNumber >= 1 && $newNumber <= $boardSize;
+                $isLetterInBoardBorder = $newLetter >= 'A' && $newLetter < chr(ord('A') + $boardSize);
+                $isNumberInBoardBorder = $newNumber >= 1 && $newNumber <= $boardSize;
+                if (!$isLetterInBoardBorder || !$isNumberInBoardBorder) {
+                    continue;
+                }
 
-            $newCoordinates = $newLetter . $newNumber;
-        } while (!$isLetterInBoardBorder || !$isNumberInBoardBorder || in_array($newNumber, $unavailableCoordinates));
+                $newCoordinates = $newLetter . $newNumber;
+                if (in_array($newCoordinates, $unavailableCoordinates)) {
+                    continue;
+                }
 
-        return $newCoordinates;
+                return $newCoordinates;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -126,10 +142,10 @@ class GameServeAiAction extends GameServePlayer
      */
     private function drawCoordinates(): string
     {
-        $boardSize = $this->parameterBag->get('board_size');
+        $boardSize = $this->serveActionPlayer->getParameterBag()->get('board_size');
         $letter = chr(rand(
             ord('A'),
-            ord('A') + $boardSize
+            ord('A') + $boardSize - 1
         ));
         $number = rand(1, $boardSize);
 
@@ -141,18 +157,17 @@ class GameServeAiAction extends GameServePlayer
      */
     private function getActions(bool $forOpponent = false): array
     {
-        /** @var User $user */
-        $user = $this->security->getUser();
+        $aiId = $this->serveActionPlayer->getParameterBag()->get('ai_id');
 
         $dataToReturn = [];
-        $gameInfo = $this->getGameInfo();
-        $turnFlag = $this->getUserPositionInQueue($forOpponent);
+        $gameInfo = $this->serveActionPlayer->getGameInfo();
+        $turnFlag = $this->serveActionPlayer->getUserPositionInQueue($forOpponent);
 
         array_splice($gameInfo, (int)!$turnFlag, 1);
         array_shift($gameInfo);
 
         foreach ($gameInfo as &$info) {
-            if ($info['userAction'] === $user->getId()) {
+            if ($info['userAction'] === $aiId) {
                 $dataToReturn[] = $info;
             }
         }
@@ -185,6 +200,12 @@ class GameServeAiAction extends GameServePlayer
                 case GameResponseStatusEnum::HIT:
                     $status = GameResponseStatusEnum::HIT;
                     break;
+                case GameResponseStatusEnum::HUNTED_AND_HIT:
+                    $status = GameResponseStatusEnum::HUNTED_AND_HIT;
+                    break;
+                case GameResponseStatusEnum::HUNTED:
+                    $status = GameResponseStatusEnum::HUNTED;
+                    break;
                 case GameResponseStatusEnum::KILLED:
                     $status = GameResponseStatusEnum::KILLED;
                     break;
@@ -196,6 +217,8 @@ class GameServeAiAction extends GameServePlayer
             GameResponseStatusEnum::MISS_HIT => [],
             GameResponseStatusEnum::HIT => [],
             GameResponseStatusEnum::KILLED => [],
+            GameResponseStatusEnum::HUNTED_AND_HIT => [],
+            GameResponseStatusEnum::HUNTED => [],
         ];
         $opponentActions = $this->getActions($forOpponent);
 
@@ -206,14 +229,22 @@ class GameServeAiAction extends GameServePlayer
         return $dataToReturn;
     }
 
-    private function findLastHitShipIdInAction(array $action): int
+    /**
+     * @throws \Exception
+     */
+    private function getActualHuntedActions(): array
     {
-        foreach (array_keys($action['hit']) as $shipHitId) {
-            if (!in_array($shipHitId, $action['killed'])) {
-                return $shipHitId;
+        $actions = $this->getActions(true);
+        $huntedActions = [];
+
+        foreach (array_reverse($actions) as $action) {
+            if ($action['status'] === GameResponseStatusEnum::HUNTED_AND_HIT) {
+                $huntedActions[] = $action;
+            } else if (in_array($action['status'], [GameResponseStatusEnum::KILLED, GameResponseStatusEnum::MISS_HIT])) {
+                break;
             }
         }
 
-        throw new \Exception("In action with position {$action['positionInGameInfo']} any hit ship has been found!");
+        return $huntedActions;
     }
 }
