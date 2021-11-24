@@ -132,7 +132,7 @@ class GameServePlayer
             if (in_array($index, range(0, $usersCount - 1))) {
                 continue;
             }
-            
+
             if ($action['userAction'] !== $searchedOpponent->getId()) {
                 continue;
             }
@@ -188,16 +188,17 @@ class GameServePlayer
     public function getEndGameData(): ?array
     {
         if ($this->isGameOver()) {
-            // game over
-            return [];
+            $status = 'gameOver';
+        } else if ($this->isVictory()) {
+            $status = 'victory';
+        } else {
+            return null;
         }
 
-        if ($this->isVictory()) {
-            // victory
-            return [];
-        }
-
-        return null;
+        return [
+            'status' => $status,
+            'opponentShips' => $this->getUserShipsInfo(true),
+        ];
     }
 
     public function generateEmptyLastAction(bool $forUser = true): array

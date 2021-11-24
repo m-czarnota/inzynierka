@@ -1,7 +1,7 @@
 <template>
     <div class="board"
          ref="boardRef"
-         :class="{ 'col-6': $router.currentRoute.value.name === 'Arrange Ships' }">
+         :class="{ 'col-6': isArrangeRoute }">
         <div v-for="n in size" class="board-row">
             <field-component v-for="k in size"
                              :data-coordinates="n + '' + k"
@@ -11,6 +11,10 @@
                              @dragenter="dragDropShipHelper.onDragEnter($event)"
                              @dragleave="dragDropShipHelper.onDragLeave($event)"
                              @dragover.prevent></field-component>
+        </div>
+        <div v-if="isArrangeRoute" class="board-buttons">
+            <button type="button" @click="clear">Clear</button>
+            <button type="button" @click="drawAgain">Draw again</button>
         </div>
     </div>
 </template>
@@ -79,7 +83,21 @@ export default {
                 });
             });
         },
+        drawAgain() {
+            shipPlacementService.putAllShipsToStorage();
+            shipPlacementService.autoPlaceAllShips();
+        },
+        clear() {
+            shipPlacementService.putAllShipsToStorage();
+            emitter.emit('storage-rerender', true);
+            dragDropShipHelper.setAppropriateColorForAllFields();
+        },
     },
+    computed: {
+        isArrangeRoute() {
+            return this.$router.currentRoute.value.name === 'Arrange Ships';
+        }
+    }
 }
 </script>
 
