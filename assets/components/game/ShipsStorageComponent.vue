@@ -32,6 +32,9 @@ export default {
         emitter.on('drop-complete', isComplete => {
             isComplete ? this.$forceUpdate() : '';
         });
+        emitter.on('storage-rerender', value => {
+            this.$forceUpdate();
+        });
     },
 }
 </script>

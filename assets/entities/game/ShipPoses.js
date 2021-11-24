@@ -8,19 +8,19 @@ export const ShipPoses = {
              */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
+            },
+            {
+                "grid-row-start": 2,
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 2,
                 "grid-column-start": 2
-            },
-            {
-                "grid-row-start": 2,
-                "grid-column-start": 3
             },
             {
                 "grid-row-start": 3,
-                "grid-column-start": 3
+                "grid-column-start": 2
             }
         ],
         [
@@ -31,40 +31,40 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 3
-            },
-            {
-                "grid-row-start": 2,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 2,
                 "grid-column-start": 2
             },
-            {
-                "grid-row-start": 3,
-                "grid-column-start": 2
-            }
-        ],
-        [
-            /*
-            + +
-              + +
-            */
             {
                 "grid-row-start": 2,
                 "grid-column-start": 1
             },
             {
+                "grid-row-start": 3,
+                "grid-column-start": 1
+            }
+        ],
+        [
+            /*
+            + +
+              + +
+            */
+            {
+                "grid-row-start": 1,
+                "grid-column-start": 1
+            },
+            {
+                "grid-row-start": 1,
+                "grid-column-start": 2
+            },
+            {
                 "grid-row-start": 2,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 3,
-                "grid-column-start": 2
-            },
-            {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 3
             }
         ],
@@ -74,19 +74,19 @@ export const ShipPoses = {
             + +
             */
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 3
             },
             {
+                "grid-row-start": 1,
+                "grid-column-start": 2
+            },
+            {
                 "grid-row-start": 2,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 3,
-                "grid-column-start": 2
-            },
-            {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 1
             }
         ],
@@ -95,19 +95,19 @@ export const ShipPoses = {
             + + + +
             */
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 1
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 3
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 4
             }
         ],
@@ -120,19 +120,19 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 3,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 4,
-                "grid-column-start": 2
+                "grid-column-start": 1
             }
         ],
         [
@@ -141,19 +141,19 @@ export const ShipPoses = {
                 +
             */
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 1
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 3
             },
             {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 3
             }
         ],
@@ -163,19 +163,19 @@ export const ShipPoses = {
             +
             */
             {
-                "grid-row-start": 3,
-                "grid-column-start": 1
-            },
-            {
                 "grid-row-start": 2,
                 "grid-column-start": 1
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
+                "grid-column-start": 1
+            },
+            {
+                "grid-row-start": 1,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 3
             }
         ],
@@ -185,19 +185,19 @@ export const ShipPoses = {
             + + +
             */
             {
+                "grid-row-start": 1,
+                "grid-column-start": 1
+            },
+            {
                 "grid-row-start": 2,
                 "grid-column-start": 1
             },
             {
-                "grid-row-start": 3,
-                "grid-column-start": 1
-            },
-            {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 3
             }
         ],
@@ -207,19 +207,19 @@ export const ShipPoses = {
             + + +
             */
             {
+                "grid-row-start": 1,
+                "grid-column-start": 3
+            },
+            {
                 "grid-row-start": 2,
                 "grid-column-start": 3
             },
             {
-                "grid-row-start": 3,
-                "grid-column-start": 3
-            },
-            {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 3,
+                "grid-row-start": 2,
                 "grid-column-start": 1
             }
         ],
@@ -231,19 +231,19 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 3,
-                "grid-column-start": 2
+                "grid-column-start": 1
             }
         ],
         [
@@ -254,19 +254,19 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 2
+                "grid-column-start": 1
+            },
+            {
+                "grid-row-start": 3,
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 3,
                 "grid-column-start": 2
-            },
-            {
-                "grid-row-start": 3,
-                "grid-column-start": 3
             }
         ],
         [
@@ -277,19 +277,19 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 1,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 3,
-                "grid-column-start": 3
+                "grid-column-start": 2
             }
         ],
         [
@@ -300,19 +300,19 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 3
-            },
-            {
-                "grid-row-start": 3,
-                "grid-column-start": 3
+                "grid-column-start": 2
             },
             {
                 "grid-row-start": 3,
                 "grid-column-start": 2
+            },
+            {
+                "grid-row-start": 3,
+                "grid-column-start": 1
             }
         ]
     ],
@@ -394,15 +394,15 @@ export const ShipPoses = {
             + + +
             */
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 1
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 2
             },
             {
-                "grid-row-start": 2,
+                "grid-row-start": 1,
                 "grid-column-start": 3
             }
         ],
@@ -414,15 +414,15 @@ export const ShipPoses = {
             */
             {
                 "grid-row-start": 1,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 2,
-                "grid-column-start": 2
+                "grid-column-start": 1
             },
             {
                 "grid-row-start": 3,
-                "grid-column-start": 2
+                "grid-column-start": 1
             }
         ]
     ],

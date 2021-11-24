@@ -68,8 +68,11 @@ class DragDropShipHelper {
         event.dataTransfer.setData('numberOfShipSelectedElement', this.numberOfShipSelectedElement);
         event.dataTransfer.setData('shipElements', JSON.stringify(shipElements ?? this.shipElements));
 
+        shipPlacementService.defineCustomEvent(event.target, this.servicedShip, this.numberOfShipSelectedElement);
+
         if (additionalData) {
             Object.keys(additionalData).forEach(key => event.dataTransfer.setData(key, additionalData[key]));
+            Object.keys(additionalData).forEach(key => shipPlacementService.customEvent.key = additionalData[key]);
         }
     }
 
@@ -107,14 +110,19 @@ class DragDropShipHelper {
      * Appends to document copy of ship HTML Element to proper working the dragImage.
      * @param selector
      */
-    insertShipHtml(selector = 'body') {
+    insertShipHtml(selector = '#ships-storage-helper') {
         if (!this.servicedShip) {
             return;
         }
 
-        if (!document.querySelector(`#${Ship.clonedShipIdPrefix}${this.servicedShip.id}`)) {
-            document.querySelector(selector).appendChild(this.servicedShip.fieldsParent);
+        if (!document.querySelector('#ships-storage-helper')) {
+            const div = document.createElement('div');
+            div.id = 'ships-storage-helper';
+            document.querySelector('body').appendChild(div);
         }
+
+        this.removeShipHtml();
+        document.querySelector(selector).appendChild(this.servicedShip.fieldsParent);
     }
 
     /**
@@ -268,25 +276,29 @@ class DragDropShipHelper {
 
     onDragEnter(event) {
         // TODO change cursor on blocked when is cannot place the ship
-        this.changeColorFieldForDraggedShip(event);
+        shipPlacementService.customEvent.target = event.target;
+        this.changeColorFieldForDraggedShip(shipPlacementService.customEvent);
     }
 
     onDragLeave(event) {
-        this.changeColorFieldForDraggedShip(event, false);
+        shipPlacementService.customEvent.target = event.target
+        this.changeColorFieldForDraggedShip(shipPlacementService.customEvent, false);
     }
 
     /**
      * Sets appropriate color for fields depending on the their actual state and membership.
      */
     setAppropriateColorForAllFields(missAround = false) {
-        // TODO better colors
         for (let field of this.board.fields.flat()) {
+            const htmlElement = field.htmlElement;
+            htmlElement.classList.remove('ship-can-be-placed');
+
             if (field.shipPointer !== null) {
-                field.htmlElement.classList.add('ship-element');
+                htmlElement.classList.add('ship-element');
             } else if (field.isNextToShipPointers.length && missAround === false) {
-                field.htmlElement.classList.add('next-to-ship');
+                htmlElement.classList.add('next-to-ship');
             } else {
-                field.htmlElement.classList.remove('ship-element', 'next-to-ship');
+                htmlElement.classList.remove('ship-element', 'next-to-ship');
             }
         }
     }
@@ -327,15 +339,15 @@ class DragDropShipHelper {
         ]
     }
 
-    changeColorFieldForDraggedShip(event, addColor = true, color = 'blue') {
+    changeColorFieldForDraggedShip(event, addColor = true) {
         const shipMovingProperty = this.targetsInBoardBoundary(event);
         if (shipMovingProperty) {
             shipMovingProperty.shipElements.forEach((shipElement) => {
                 const boardField = this.board.getFieldForShipElement(shipMovingProperty, shipElement);
 
-                // if (boardField.isActive) {
-                //     boardField.htmlElement.style.backgroundColor = addColor ? color : '';
-                // }
+                if (boardField.isActive) {
+                    boardField.htmlElement.classList[addColor ? 'add' : 'remove']('ship-can-be-placed');
+                }
             });
         }
     }

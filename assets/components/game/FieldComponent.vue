@@ -22,7 +22,9 @@ export default {
     props: ['disableProps', 'isUserOwner'],
     mounted() {
         this.$refs["board-cell"].classList.add(this.isUserOwner ? 'inactive' : 'active');
-        this.disable !== undefined && !this.disable ? this.turnOn() : this.$refs["board-cell"].classList.add('disabled');
+        if (this.disable !== undefined) {
+            !this.disable ? this.turnOn() : this.$refs["board-cell"].classList.add('disabled');
+        }
 
         emitter.on('yourTurn', yourTurn => {
             if (this.isUserOwner) {

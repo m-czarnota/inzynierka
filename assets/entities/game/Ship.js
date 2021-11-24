@@ -42,7 +42,7 @@ export class Ship {
         this.fieldsParent = node.cloneNode(true);
         this.fieldsParent.id = Ship.clonedShipIdPrefix + this.id;
         this.fieldsParent.style.position = 'absolute';
-        this.fieldsParent.style.top = '-1000px';
+        this.fieldsParent.style.top = (-this.id + 1) * 1000 + 'px';
     }
 
     actualPoseIncrement() {

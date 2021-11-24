@@ -75,8 +75,8 @@ const listenForResponse = (board) => {
         serveResponseRequestHelper.serveAction(data, board);
     }
 
-    listener();
-    // setInterval(listener, 1000);
+    // listener();
+    setInterval(listener, 1000);
 };
 
 const applyAllPreviousActions = (actions, boardUser, boardOpponent) => {
