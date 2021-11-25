@@ -1,0 +1,5 @@
+{% block form_row %}
+    {{ form_errors(form, attr) }}
+    {{ form_label(form, '', { 'label_attr': { 'class': label.attr.class|default('') } }) }}
+    {{ form_widget(form, attr) }}
+{% endblock %}

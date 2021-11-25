@@ -1,0 +1,19 @@
+@import "palette";
+
+#register-container {
+  padding: 5em 25%;
+
+  #form-register {
+    background-color: $form-register-background;
+    padding: 5em;
+    border: 1px solid $form-register-border-color;
+    border-radius: 5px;
+    box-shadow: 1px 1px 1px 1px $form-register-box-shadow-color;
+
+    #other-links {
+      margin-top: 2em;
+      padding-top: 2em;
+      border-top: 1px solid $other-links-border-color;
+    }
+  }
+}

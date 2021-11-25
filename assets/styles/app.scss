@@ -1,4 +1,6 @@
-@use "game/loader";
+@use "game/gameLoader";
+@use "security/login";
+@use "registration/registrationLoader";
 
 @import "~bootstrap";
 @import "palette";
