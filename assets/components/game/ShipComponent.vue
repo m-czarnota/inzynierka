@@ -1,6 +1,9 @@
 <template>
     <div class="ship-component">
-        <div class="board-ship" ref="x" :aria-label="ship.elementsCount">
+        <div class="board-ship"
+             ref="x"
+             :aria-label="ship.elementsCount"
+        >
             <field-component :coordinates-prop="'A1'"
                              v-for="n in ship.elementsCount"
                              class="board-ship-element"
@@ -11,7 +14,13 @@
                                 numberOfShipSelectedElement: n
                             })"></field-component>
         </div>
-        <button @click="ship.rotate()" v-if="ship.elementsCount > 1">Rotate</button>
+        <div class="buttons mt-2 pt-2 border-top w-100 d-flex align-items-center justify-content-center"
+             v-if="ship.elementsCount > 1"
+        >
+            <button @click="ship.rotate()"
+                    v-if="ship.elementsCount > 1"
+                    class="btn btn-light btn-outline-dark">Rotate</button>
+        </div>
     </div>
 </template>
 

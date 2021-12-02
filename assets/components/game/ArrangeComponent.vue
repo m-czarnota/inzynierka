@@ -1,12 +1,12 @@
 <template>
-    <div class="arrange-component">
-        <main class="arrange-main">
-            <ships-storage-component></ships-storage-component>
-            <board-component></board-component>
+    <div class="arrange-component col-12">
+        <main class="arrange-main col-12 d-flex flex-wrap-reverse">
+            <ships-storage-component class="col-12 col-md-6"></ships-storage-component>
+            <board-component class="col-12 col-md-6"></board-component>
         </main>
         <div class="buttons d-flex justify-content-around mt-5">
-            <button type="button" class="btn btn-secondary back-button" @click="back">Back</button>
-            <button type="button" class="btn btn-warning play-button" @click="play">Play</button>
+            <button type="button" class="btn btn-secondary back-button p-3 fw-bold" @click="back">Back</button>
+            <button type="button" class="btn btn-success play-button p-3 fw-bold" @click="play">Play</button>
         </div>
     </div>
 </template>

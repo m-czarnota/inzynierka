@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_login.html.twig' %}
 
 {% block javascripts %}
     {{ parent() }}
@@ -18,5 +18,5 @@
     <input type="hidden" id="response-statuses" value="{{ responseStatuses }}">
     <input type="hidden" id="request-statuses" value="{{ requestStatuses }}">
 
-    <div id="app"></div>
+    <div id="app" class="col-12"></div>
 {% endblock %}

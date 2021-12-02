@@ -1,10 +1,12 @@
 <template>
-    <div class="ships-storage-component col-6"
-         @drop="onDrop($event)"
-         @dragover.prevent ref="shipsStorage">
-        <template v-for="ship in ships" :key="ship.id">
-            <ship-component :ship="ship"></ship-component>
-        </template>
+    <div class="ships-storage-component d-flex p-3">
+        <div class="ships-storage d-flex flex-wrap"
+             @drop="onDrop($event)"
+             @dragover.prevent ref="shipsStorage">
+            <template v-for="ship in ships" :key="ship.id">
+                <ship-component :ship="ship" class="d-flex flex-column p-1 p-md-2 align-items-center justify-content-center"></ship-component>
+            </template>
+        </div>
     </div>
 </template>
 

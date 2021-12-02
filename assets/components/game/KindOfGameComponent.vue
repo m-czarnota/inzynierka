@@ -1,18 +1,22 @@
 <template>
-    <div class="kind-of-game-component">
-        <div class="kind-of-game-choices">
-            <div v-for="(value, name) in kindsOfGame" class="choice-div">
+    <div class="kind-of-game-component col-12">
+        <div class="kind-of-game-choices col-12 d-flex flex-wrap align-items-center">
+            <div v-for="(value, name) in kindsOfGame" class="choice-div col-12 col-sm-6 col-md-4 p-2">
                 <input type="radio"
                        :id="`kindOfGame${value}`"
                        :value="value"
                        name="kindOfGame"
                        v-model="chosenOption"
                        @change="saveChoice">
-                <label :for="`kindOfGame${value}`">{{ getProcessedName(name) }}</label>
+                <label :for="`kindOfGame${value}`" class="d-flex flex-column">
+                    <span class="h3">{{ getProcessedName(name) }}</span>
+                    <span>Play as you like! Description</span>
+                </label>
             </div>
         </div>
         <div class="buttons d-flex justify-content-end">
-            <button class="btn btn-warning"
+            <button class="btn btn-success p-3 fw-bold"
+                    id="goToArrange"
                     type="button"
                     @click="goToArrangeShips"
                     :disabled="!choiceIsValid">

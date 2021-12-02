@@ -15,12 +15,7 @@
     <div class="container-fluid">
         <div class="row">
             {% block nav %}{% endblock %}
-            <div class="col-3 col-md-2 aside-container">
-                {% block aside %}{% endblock %}
-            </div>
-            <div class="col-9 col-md-10 body-container">
-                {% block body %}{% endblock %}
-            </div>
+            {% block body %}{% endblock %}
             {% block footer %}{% endblock %}
         </div>
     </div>
