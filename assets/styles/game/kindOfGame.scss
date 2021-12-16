@@ -1,3 +1,5 @@
+@import "palette";
+
 .kind-of-game-choices {
   margin-bottom: 1em;
 
@@ -10,8 +12,8 @@
       cursor: pointer;
       width: 100%;
       text-align: center;
-      background-color: white;
-      box-shadow: 1px 1px 1px 1px #999999;
+      background-color: $kind-of-game-choice-label-background;
+      box-shadow: 1px 1px 1px 1px $kind-of-game-choice-label-shadow;
     }
 
     input[type=radio] {

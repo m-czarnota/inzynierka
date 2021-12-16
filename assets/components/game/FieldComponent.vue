@@ -3,7 +3,6 @@
 </template>
 
 <script>
-import {gameState} from "../../services/GameState";
 import {emitter} from "../../services/Emitter";
 import {gameRouter} from "../../services/GameRouter";
 import {requestStatuses, responseStatuses} from "../../loaders/appGame";

@@ -1,11 +1,17 @@
 <template>
     <div class="game-component d-none">
-        <div class="game-boards d-flex">
-            <div class="player col-6" id="user">
+        <div class="game-boards d-flex flex-wrap-reverse p-3">
+            <div class="player col-12 col-md-6 d-flex flex-column flex-xl-row justify-content-evenly align-items-center p-3"
+                 id="user"
+            >
                 <board-component :board="boardUser" :is-user-owner="true"></board-component>
+                <ships-info-component :is-user-owner="true"></ships-info-component>
             </div>
-            <div class="player col-6" id="opponent">
+            <div class="player col-12 col-md-6 d-flex flex-column flex-xl-row-reverse justify-content-evenly align-items-center p-3"
+                 id="opponent"
+            >
                 <board-component :board="boardOpponent" :disable="gameState.yourTurn"></board-component>
+                <ships-info-component class="align-items-end"></ships-info-component>
             </div>
         </div>
     </div>
@@ -19,12 +25,12 @@ import {Board} from "../../entities/game/Board";
 import {Ship} from "../../entities/game/Ship";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameState} from "../../services/GameState";
-import {responseStatuses} from "../../loaders/appGame";
 import {serveResponseRequestHelper} from "../../services/ServeResponseRequestHelper";
+import ShipsInfoComponent from "./ShipsInfoComponent";
 
 export default {
     name: "GameComponent",
-    components: {BoardComponent},
+    components: {ShipsInfoComponent, BoardComponent},
     data() {
         return {
             gameState: gameState,
@@ -75,8 +81,8 @@ const listenForResponse = (board) => {
         serveResponseRequestHelper.serveAction(data, board);
     }
 
-    // listener();
-    setInterval(listener, 1000);
+    listener();
+    // setInterval(listener, 1000);
 };
 
 const applyAllPreviousActions = (actions, boardUser, boardOpponent) => {

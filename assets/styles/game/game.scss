@@ -1,0 +1,13 @@
+.ship-info-element {
+  padding: 5px;
+  margin: 5px;
+}
+
+#user {
+  border-right: 1px solid gray;
+
+  @media screen and (max-width: 991px) {
+    border-right: 0;
+    border-top: 1px solid gray;
+  }
+}

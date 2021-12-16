@@ -1,5 +1,6 @@
 import {gameState} from "./GameState";
 import {responseStatuses} from "../loaders/appGame";
+import {emitter} from "./Emitter";
 
 class ServeResponseRequestHelper {
     serveAction(data, board) {
@@ -26,12 +27,15 @@ class ServeResponseRequestHelper {
         }
 
         if (gameState.displayMessages && !gameState.applyingMovesAfterLoad) {
-            console.log(this.data.message);
+            emitter.emit('newBasicToast', {
+                header: this.data.header,
+                message: this.data.message,
+                time: this.getCurrentTimeWithoutSeconds(),
+            });
         }
 
         switch (this.data.status) {
             case responseStatuses.error:
-                console.error(this.data.message);
                 break;
             case responseStatuses.hunted_and_hit:
             case responseStatuses.hit:
@@ -53,10 +57,19 @@ class ServeResponseRequestHelper {
     }
 
     serveKill() {
-        if (this.data.userAction !== gameState.yourId) {
+        const isUserOwner = this.data.userAction !== gameState.yourId;
+        const killedShipToEmit = {
+            'shipId': this.data.killed.at(-1),
+            'isUserOwner': isUserOwner,
+        }
+
+        if (isUserOwner) {
             const field = this.board.getFieldByCoordinates(this.data.coordinates);
             const ship = this.board.ships.find(ship => ship.id === field.shipPointer);
             ship.setKilledStatus();
+
+            emitter.emit('updateShipInfo', killedShipToEmit);
+
             return;
         }
 
@@ -68,6 +81,8 @@ class ServeResponseRequestHelper {
             const field = this.board.getFieldByCoordinates(aroundFieldCoordinates);
             field.setInactiveStatus();
         });
+
+        emitter.emit('updateShipInfo', killedShipToEmit);
     }
 
     serveMissHit() {
@@ -83,6 +98,18 @@ class ServeResponseRequestHelper {
 
     serveWalkover() {
         alert('walkover, end game');
+    }
+
+    getCurrentTime() {
+        const currentDate = new Date().toLocaleString();
+        const posOfComma = currentDate.indexOf(',');
+
+        return currentDate.slice(posOfComma + 2);
+    }
+
+    getCurrentTimeWithoutSeconds() {
+        const currentTime = this.getCurrentTime();
+        return currentTime.slice(0, currentTime.indexOf(':', 4));
     }
 }
 

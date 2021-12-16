@@ -40,3 +40,11 @@
 .ship-can-be-placed {
   background-color: $ship-element-can-be-placed-background;
 }
+
+.ship-info-element {
+  background-color: $ship-info-element-background;
+
+  &.killed {
+    background-color: $ship-info-element-killed-background;
+  }
+}

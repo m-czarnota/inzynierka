@@ -9,6 +9,7 @@
 
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
+        {{ encore_entry_script_tags('appToast') }}
     {% endblock %}
 </head>
 <body>
@@ -16,6 +17,11 @@
         <div class="row">
             {% block nav %}{% endblock %}
             {% block body %}{% endblock %}
+            {% block toast %}
+                <div aria-live="polite" aria-atomic="true" class="position-relative">
+                    <div class="toast-container position-absolute top-0 end-0 p-3" id="toast-container"></div>
+                </div>
+            {% endblock %}
             {% block footer %}{% endblock %}
         </div>
     </div>

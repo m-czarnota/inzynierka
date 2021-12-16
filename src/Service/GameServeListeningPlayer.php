@@ -33,7 +33,8 @@ class GameServeListeningPlayer extends GameServePlayer
         if (!$game) {
             return [
                 'status' => GameResponseStatusEnum::ERROR,
-                'message' => $this->translator->trans('game.gameActions.responses.notInGame'),
+                'header' => $this->translator->trans('game.gameActions.headers.responses.error'),
+                'message' => $this->translator->trans('game.gameActions.messages.responses.notInGame'),
             ];
         }
 
@@ -53,7 +54,8 @@ class GameServeListeningPlayer extends GameServePlayer
 
         $dataToReturn = [
             'status' => GameResponseStatusEnum::NO_CHANGED,
-            'message' => $this->translator->trans('game.gameActions.responses.waiting'),
+            'header' => $this->translator->trans('game.gameActions.headers.responses.waiting'),
+            'message' => $this->translator->trans('game.gameActions.messages.responses.waiting'),
             'yourTurn' => $this->isYourTurn(),
             'userAction' => $this->getOpponent()->getId(),
         ];
@@ -70,13 +72,16 @@ class GameServeListeningPlayer extends GameServePlayer
 
         if ($hitShipId === null) {
             $dataToReturn['status'] = GameResponseStatusEnum::MISS_HIT;
-            $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.miss_hit');
+            $dataToReturn['header'] = $this->translator->trans('game.gameActions.headers.responses.miss_hit');
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.messages.responses.miss_hit');
             return $dataToReturn;
         }
 
         if ($this->isShipKilledInAction($lastAction, $hitShipId)) {
             $dataToReturn['status'] = GameResponseStatusEnum::KILLED;
-            $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.killed');
+            $dataToReturn['header'] = $this->translator->trans('game.gameActions.headers.responses.killed');
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.messages.responses.killed');
+            $dataToReturn['killed'] = $lastAction['killed'];
 
             $shipCoordinates = $this->getCoordinatesForShipById($hitShipId);
             $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
@@ -85,7 +90,8 @@ class GameServeListeningPlayer extends GameServePlayer
         }
 
         $dataToReturn['status'] = GameResponseStatusEnum::HIT;
-        $dataToReturn['message'] = $this->translator->trans('game.gameActions.responses.hit');
+        $dataToReturn['header'] = $this->translator->trans('game.gameActions.headers.responses.hit');
+        $dataToReturn['message'] = $this->translator->trans('game.gameActions.messages.responses.hit');
 
         if ($endGameData = $this->getEndGameData()) {
             return $endGameData;

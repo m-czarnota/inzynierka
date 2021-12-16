@@ -43,6 +43,7 @@ class GameController extends AbstractController
         if (KindOfGameEnum::isValid($kindOfGame) === false) {
             return new JsonResponse([
                 'state' => 'exception',
+                'header' => 'Server problem',
                 'message' => 'Sorry, matchmaking is not available. Please try again in a few moments.',
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
@@ -55,6 +56,7 @@ class GameController extends AbstractController
         if (!$opponent) {
             return new JsonResponse([
                 'state' => GameResponseStatusEnum::ERROR,
+                'header' => 'Game not found',
                 'message' => 'Sorry, game has not been found.',
             ], Response::HTTP_ACCEPTED);
         }
