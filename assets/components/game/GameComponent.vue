@@ -1,5 +1,9 @@
 <template>
     <div class="game-component d-none">
+        <end-game-component class="d-none" ref="end-game-component"></end-game-component>
+        <div class="col-12 d-flex align-items-center justify-content-center p-3 bg-light mt-3 rounded-3 shadow-sm info-banner">
+            <h3 ref="info-banner">Info</h3>
+        </div>
         <div class="game-boards d-flex flex-wrap-reverse p-3">
             <div class="player col-12 col-md-6 d-flex flex-column flex-xl-row justify-content-evenly align-items-center p-3"
                  id="user"
@@ -27,14 +31,23 @@ import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameState} from "../../services/GameState";
 import {serveResponseRequestHelper} from "../../services/ServeResponseRequestHelper";
 import ShipsInfoComponent from "./ShipsInfoComponent";
+import {emitter} from "../../services/Emitter";
+import EndGameComponent from "./EndGameComponent";
+
+const $ = require('jquery');
 
 export default {
     name: "GameComponent",
-    components: {ShipsInfoComponent, BoardComponent},
+    components: {EndGameComponent, ShipsInfoComponent, BoardComponent},
     data() {
         return {
             gameState: gameState,
         };
+    },
+    mounted() {
+        emitter.on('updateInfoBanner', info => {
+            this.$refs["info-banner"].textContent = info;
+        });
     },
     setup() {
         const userShips = ref(null);
@@ -57,6 +70,8 @@ export default {
             document.querySelector('.game-component').classList.remove('d-none');
 
             listenForResponse(boardUser);
+
+            $('.end-game-component').removeClass('d-none').css({'display': 'none'}).slideDown('slow');
         });
 
         return {

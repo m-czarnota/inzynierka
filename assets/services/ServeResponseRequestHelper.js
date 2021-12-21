@@ -7,6 +7,11 @@ class ServeResponseRequestHelper {
         this.board = board;
         this.data = data;
 
+        emitter.emit('updateInfoBanner', (() => {
+            let message = this.isUserOwner() ? 'You: ' : 'Opponent: ';
+            return message + this.data.header;
+        })());
+
         if (data.status === responseStatuses.end_game) {
             this.serveBasicActions();
             this.serveEndGame();
@@ -26,7 +31,7 @@ class ServeResponseRequestHelper {
             throw new Error('Data or Board is missing!');
         }
 
-        if (gameState.displayMessages && !gameState.applyingMovesAfterLoad) {
+        if (gameState.displayMessages && !gameState.applyingMovesAfterLoad && !this.getNoDisplayMessageActions().includes(this.data.status)) {
             emitter.emit('newBasicToast', {
                 header: this.data.header,
                 message: this.data.message,
@@ -57,7 +62,7 @@ class ServeResponseRequestHelper {
     }
 
     serveKill() {
-        const isUserOwner = this.data.userAction !== gameState.yourId;
+        const isUserOwner = this.isUserOwner();
         const killedShipToEmit = {
             'shipId': this.data.killed.at(-1),
             'isUserOwner': isUserOwner,
@@ -110,6 +115,18 @@ class ServeResponseRequestHelper {
     getCurrentTimeWithoutSeconds() {
         const currentTime = this.getCurrentTime();
         return currentTime.slice(0, currentTime.indexOf(':', 4));
+    }
+
+    getNoDisplayMessageActions() {
+        if (this.noDisplayMessageActions === undefined) {
+            this.noDisplayMessageActions = [responseStatuses.no_changed];
+        }
+
+        return this.noDisplayMessageActions;
+    }
+
+    isUserOwner() {
+        return this.data.userAction !== gameState.yourId;
     }
 }
 
