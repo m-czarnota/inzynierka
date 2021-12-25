@@ -50,7 +50,7 @@ export default {
         this.board.wasFirstMount = true;
 
         emitter.on('refreshBoard', isRefresh => {
-            isRefresh ? this.$forceUpdate : '';
+            isRefresh ? this.$forceUpdate() : '';
         })
     },
     setup(props) {

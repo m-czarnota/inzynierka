@@ -21,6 +21,8 @@ import {shipPlacementService} from "../../services/ShipPlacementService";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameRouter} from "../../services/GameRouter";
 import {kindsOfGame} from "../../loaders/appGame";
+import {emitter} from "../../services/Emitter";
+import {timeUtil} from "../../utils/TimeUtil";
 
 export default {
     name: "ArrangeComponent",
@@ -45,7 +47,7 @@ export default {
         },
         play() {
             if (shipsStorage.ships.length !== 0) {
-                console.error('You must place all ships on the board!');
+                this.displayError('You must place all ships on the board!');
                 return;
             }
 
@@ -78,7 +80,7 @@ export default {
                     const data = await response.json();
 
                     if (!response.ok) {
-                        console.error(data.message);
+                        this.displayError(data.message);
                         return null;
                     }
 
@@ -94,7 +96,7 @@ export default {
 
                     return data;
                 } catch (error) {
-                    console.error(error);
+                    this.displayError(error);
                 }
 
                 return null;
@@ -112,16 +114,22 @@ export default {
                 board.remove();
             })();
         },
-
         gameNotFound(message) {
             clearInterval(this.countSeconds);
             this.whichSecond = 0;
             this.whichApproach = 0;
 
-            console.error(message);
+            this.displayError(message);
 
             document.querySelector('.play-button').removeAttribute('disabled');
         },
+        displayError(message) {
+            emitter.emit('newBasicToast', {
+                header: 'Error',
+                message: message,
+                time: timeUtil.getCurrentTimeWithoutSeconds(),
+            });
+        }
     },
 }
 </script>

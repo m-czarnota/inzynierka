@@ -32,7 +32,7 @@ export default {
             if (shipInfo.isUserOwner !== this.isUserOwner) {
                 return;
             }
-            
+
             this.elements[shipInfo.shipId].querySelectorAll('.ship-info-element').forEach(element => {
                 element.classList.add('killed');
             });

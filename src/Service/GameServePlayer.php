@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Enums\GameResponseStatusEnum;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -188,15 +189,16 @@ class GameServePlayer
     public function getEndGameData(): ?array
     {
         if ($this->isGameOver()) {
-            $status = 'gameOver';
+            $victory = false;
         } else if ($this->isVictory()) {
-            $status = 'victory';
+            $victory = true;
         } else {
             return null;
         }
 
         return [
-            'status' => $status,
+            'status' => GameResponseStatusEnum::END_GAME,
+            'victory' => $victory,
             'opponentShips' => $this->getUserShipsInfo(true),
         ];
     }

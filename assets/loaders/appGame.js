@@ -7,6 +7,8 @@ export const kindsOfGame = JSON.parse(window.atob(document.querySelector('#kinds
 export const requestStatuses = JSON.parse(window.atob(document.querySelector('#request-statuses').value));
 export const responseStatuses = JSON.parse(window.atob(document.querySelector('#response-statuses').value));
 
+export const routeToDashboard = document.querySelector('#route-to-dashboard').value;
+
 const app = createApp(MainComponent);
 app.use(gameRouter.router);
 app.mount('#app');

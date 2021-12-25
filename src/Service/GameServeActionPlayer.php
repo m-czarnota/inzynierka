@@ -130,13 +130,14 @@ class GameServeActionPlayer extends GameServePlayer
 
         $this->saveLastAction($lastAction);
 
-        if ($endGameData = $this->getEndGameData()) {
-            return $endGameData;
-        }
-
         if (in_array($lastAction['status'], [GameResponseStatusEnum::MISS_HIT, GameResponseStatusEnum::HUNTED])) {
             $this->changeTurn();
             $dataToReturn['yourTurn'] = $this->isYourTurn();
+        }
+
+        if ($endGameData = $this->getEndGameData()) {
+            $endGameData['basicData'] = $dataToReturn;
+            return $endGameData;
         }
 
         return $dataToReturn;

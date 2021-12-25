@@ -1,5 +1,5 @@
 <template>
-    <div class="basicToastContainer" ref="basicToastContainer"></div>
+    <div class="basicToastContainer d-flex flex-column-reverse" ref="basicToastContainer"></div>
 </template>
 
 <script>

@@ -60,6 +60,12 @@ class GameServeListeningPlayer extends GameServePlayer
             'userAction' => $this->getOpponent()->getId(),
         ];
 
+        // test end game view
+//        if ($endGameData = $this->getEndGameData()) {
+//            $endGameData['basicData'] = $dataToReturn;
+//            return $endGameData;
+//        }
+
         $lastAction = $this->getLastOpponentAction();
         if (!$lastAction || $lastAction['isReading'] === true) {
             return $dataToReturn;
@@ -86,16 +92,18 @@ class GameServeListeningPlayer extends GameServePlayer
             $shipCoordinates = $this->getCoordinatesForShipById($hitShipId);
             $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
             $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
+
+            if ($endGameData = $this->getEndGameData()) {
+                $endGameData['basicData'] = $dataToReturn;
+                return $endGameData;
+            }
+
             return $dataToReturn;
         }
 
         $dataToReturn['status'] = GameResponseStatusEnum::HIT;
         $dataToReturn['header'] = $this->translator->trans('game.gameActions.headers.responses.hit');
         $dataToReturn['message'] = $this->translator->trans('game.gameActions.messages.responses.hit');
-
-        if ($endGameData = $this->getEndGameData()) {
-            return $endGameData;
-        }
 
         return $dataToReturn;
     }

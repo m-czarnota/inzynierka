@@ -15,7 +15,7 @@
                  id="opponent"
             >
                 <board-component :board="boardOpponent" :disable="gameState.yourTurn"></board-component>
-                <ships-info-component class="align-items-end"></ships-info-component>
+                <ships-info-component :is-user-owner="false" class="align-items-end"></ships-info-component>
             </div>
         </div>
     </div>
@@ -33,6 +33,8 @@ import {serveResponseRequestHelper} from "../../services/ServeResponseRequestHel
 import ShipsInfoComponent from "./ShipsInfoComponent";
 import {emitter} from "../../services/Emitter";
 import EndGameComponent from "./EndGameComponent";
+import {responseStatuses} from "../../loaders/appGame";
+import {timeUtil} from "../../utils/TimeUtil";
 
 const $ = require('jquery');
 
@@ -69,9 +71,7 @@ export default {
             gameState.setTurn(data.yourTurn);
             document.querySelector('.game-component').classList.remove('d-none');
 
-            listenForResponse(boardUser);
-
-            $('.end-game-component').removeClass('d-none').css({'display': 'none'}).slideDown('slow');
+            listenForResponse(boardUser, boardOpponent);
         });
 
         return {
@@ -83,21 +83,31 @@ export default {
     methods: {},
 }
 
-const listenForResponse = (board) => {
+const listenForResponse = (boardUser, boardOpponent) => {
     const listener = async () => {
         const response = await fetch(gameRouter.gameRoutes.serveListeningPlayer);
         const data = await response.json();
 
         if (!response.status) {
-            console.error(data.message);
+            emitter.emit('newBasicToast', {
+                header: data.header,
+                message: data.message,
+                time: timeUtil.getCurrentTimeWithoutSeconds(),
+            });
             return;
+        }
+
+        let board = boardUser;
+        if (data.status === responseStatuses.end_game) {
+            board = boardOpponent;
+            clearInterval(responseListenerInterval);
         }
 
         serveResponseRequestHelper.serveAction(data, board);
     }
 
-    listener();
-    // setInterval(listener, 1000);
+    // listener();
+    const responseListenerInterval = setInterval(listener, 1000);
 };
 
 const applyAllPreviousActions = (actions, boardUser, boardOpponent) => {
