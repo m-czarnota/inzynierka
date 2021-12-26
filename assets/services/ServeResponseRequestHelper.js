@@ -1,13 +1,26 @@
 import {gameState} from "./GameState";
 import {responseStatuses} from "../loaders/appGame";
+import {emitter} from "./Emitter";
+import {timeUtil} from "../utils/TimeUtil";
+
+import $ from "jquery";
 
 class ServeResponseRequestHelper {
     serveAction(data, board) {
         this.board = board;
         this.data = data;
 
+        const updateInfoBannerFunction = (data) => {
+            let message = this.isUserOwner() ? 'You: ' : 'Opponent: ';
+            return message + data.header;
+        };
+
+        emitter.emit('updateInfoBanner', updateInfoBannerFunction(data));
+
         if (data.status === responseStatuses.end_game) {
-            this.serveBasicActions();
+            emitter.emit('updateInfoBanner', updateInfoBannerFunction(data.basicData));
+
+            this.serveBasicActions(data.basicData);
             this.serveEndGame();
             return;
         }
@@ -20,69 +33,105 @@ class ServeResponseRequestHelper {
         this.serveBasicActions();
     }
 
-    serveBasicActions() {
-        if (!this.data || !this.board) {
+    serveBasicActions(data = undefined) {
+        data = data || this.data;
+
+        if (!data || !this.board) {
             throw new Error('Data or Board is missing!');
         }
 
-        if (gameState.displayMessages && !gameState.applyingMovesAfterLoad) {
-            console.log(this.data.message);
+        if (gameState.displayMessages && !gameState.applyingMovesAfterLoad && !this.getNoDisplayMessageActions().includes(data.status)) {
+            emitter.emit('newBasicToast', {
+                header: data.header,
+                message: data.message,
+                time: timeUtil.getCurrentTimeWithoutSeconds(),
+                squareColorClass: this.isUserOwner() ? 'bg-danger' : 'bg-primary',
+            });
         }
 
-        switch (this.data.status) {
+        switch (data.status) {
             case responseStatuses.error:
-                console.error(this.data.message);
                 break;
             case responseStatuses.hunted_and_hit:
             case responseStatuses.hit:
-                this.serveHit();
+                this.serveHit(data);
                 break;
             case responseStatuses.killed:
-                this.serveKill();
+                this.serveKill(data);
                 break;
             case responseStatuses.hunted:
             case responseStatuses.miss_hit:
-                this.serveMissHit();
+                this.serveMissHit(data);
                 break;
         }
     }
 
-    serveHit() {
-        const field = this.board.getFieldByCoordinates(this.data.coordinates);
+    serveHit(data) {
+        const field = this.board.getFieldByCoordinates(data.coordinates);
         field.setHitStatus();
     }
 
-    serveKill() {
-        if (this.data.userAction !== gameState.yourId) {
-            const field = this.board.getFieldByCoordinates(this.data.coordinates);
+    serveKill(data) {
+        const isUserOwner = this.isUserOwner();
+        const killedShipToEmit = {
+            'shipId': data.killed.at(-1),
+            'isUserOwner': isUserOwner,
+        }
+
+        if (isUserOwner) {
+            const field = this.board.getFieldByCoordinates(data.coordinates);
             const ship = this.board.ships.find(ship => ship.id === field.shipPointer);
             ship.setKilledStatus();
+
+            emitter.emit('updateShipInfo', killedShipToEmit);
+
             return;
         }
 
-        this.data.boardFields.forEach(boardFieldCoordinates => {
+        data.boardFields.forEach(boardFieldCoordinates => {
             const field = this.board.getFieldByCoordinates(boardFieldCoordinates);
             field.setKilledStatus();
         });
-        this.data.aroundFields.forEach(aroundFieldCoordinates => {
+        data.aroundFields.forEach(aroundFieldCoordinates => {
             const field = this.board.getFieldByCoordinates(aroundFieldCoordinates);
             field.setInactiveStatus();
         });
+
+        emitter.emit('updateShipInfo', killedShipToEmit);
     }
 
-    serveMissHit() {
-        const field = this.board.getFieldByCoordinates(this.data.coordinates);
+    serveMissHit(data) {
+        const field = this.board.getFieldByCoordinates(data.coordinates);
         field.setMisHitStatus();
 
-        gameState.changeTurn(this.data.yourTurn);
+        gameState.changeTurn(data.yourTurn);
     }
 
     serveEndGame() {
-        alert('end game!');
+        $('.end-game-status').text(this.data.victory ? 'You win!' : 'You lose');
+        this.data.opponentShips.forEach(ship => ship.boardFields.forEach(boardField => {
+            const field = this.board.getFieldByCoordinates(boardField.coordinates);
+            field.setHitStatus();
+        }));
+
+        $('.end-game-component').removeClass('d-none').css({'display': 'none'}).slideDown('slow');
+        emitter.emit('yourTurn', false);
     }
 
     serveWalkover() {
         alert('walkover, end game');
+    }
+
+    getNoDisplayMessageActions() {
+        if (this.noDisplayMessageActions === undefined) {
+            this.noDisplayMessageActions = [responseStatuses.no_changed];
+        }
+
+        return this.noDisplayMessageActions;
+    }
+
+    isUserOwner() {
+        return this.data.userAction !== gameState.yourId;
     }
 }
 

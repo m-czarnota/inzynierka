@@ -2,16 +2,28 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Welcome!{% endblock %}</title>
+    <title>{% block title %}Tetriso Ships{% endblock %}</title>
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
     {% endblock %}
 
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
+        {{ encore_entry_script_tags('appToast') }}
     {% endblock %}
 </head>
 <body>
-{% block body %}{% endblock %}
+    <div class="container-fluid">
+        <div class="row">
+            {% block nav %}{% endblock %}
+            {% block body %}{% endblock %}
+            {% block toast %}
+                <div aria-live="polite" aria-atomic="true" class="position-relative">
+                    <div class="toast-container position-absolute top-0 end-0 p-3" id="toast-container"></div>
+                </div>
+            {% endblock %}
+            {% block footer %}{% endblock %}
+        </div>
+    </div>
 </body>
 </html>

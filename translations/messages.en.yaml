@@ -1,13 +1,26 @@
 game:
   gameActions:
-    requests:
-      miss_hit: 'Miss hit. Change turn.'
-      hit: 'Hit! You receive additional turn!'
-      killed: 'Killed! You receive additional turn!'
-      notInGame: 'You are not in a game!'
-    responses:
-      notInGame: 'You are not in a game!'
-      waiting: 'Waiting for action.'
-      miss_hit: 'The opponent missed. Change turn.'
-      killed: 'The opponent killed your ship! Additional turn for opponent.'
-      hit: 'The opponent hit your ship! Additional turn for opponent.'
+    headers:
+      requests:
+        miss_hit: 'Miss hit'
+        hit: 'Hit'
+        killed: 'Killed'
+        error: 'Error'
+      responses:
+        error: 'Error'
+        waiting: 'Waiting'
+        miss_hit: 'Miss hit'
+        killed: 'Killed'
+        hit: 'Hit'
+    messages:
+      requests:
+        miss_hit: 'Miss hit. Change turn.'
+        hit: 'Hit! You receive additional turn!'
+        killed: 'Killed! You receive additional turn!'
+        notInGame: 'You are not in a game!'
+      responses:
+        notInGame: 'You are not in a game!'
+        waiting: 'Waiting for action.'
+        miss_hit: 'The opponent missed. Change turn.'
+        killed: 'The opponent killed your ship! Additional turn for opponent.'
+        hit: 'The opponent hit your ship! Additional turn for opponent.'

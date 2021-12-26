@@ -16,9 +16,9 @@ class ShipsStorage {
 
     prepareShips() {
         this.numberOfParticularShips.forEach(item => {
-            for (let i = 0; i < item[Object.keys(item)[0]]; i++) {
+            for (let elements in [...Array(this.getNumberOfSpecifyShips(item))]) {
                 const ship = new Ship();
-                ship.elementsCount = i + 1;
+                ship.elementsCount = this.getNumberOfSpecifyShipElement(item);
                 ship.poses = ShipPoses[ship.elementsCount];
                 this.ships.push(ship);
             }
@@ -28,6 +28,14 @@ class ShipsStorage {
     remove() {
         this.ships.forEach(ship => ship.remove());
         delete this;
+    }
+
+    getNumberOfSpecifyShips(numberOfParticularShip) {
+        return Object.values(numberOfParticularShip)[0];
+    }
+
+    getNumberOfSpecifyShipElement(numberOfParticularShip) {
+        return parseInt(Object.keys(numberOfParticularShip)[0]);
     }
 }
 

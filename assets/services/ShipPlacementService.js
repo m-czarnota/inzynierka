@@ -66,7 +66,7 @@ class ShipPlacementService {
 
     putShipToStorage(ship) {
         shipPlacementService.defineCustomEvent(
-            document.querySelector('.ships-storage-component'),
+            document.querySelector('.ships-storage'),
             ship,
             1
         );

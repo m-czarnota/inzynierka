@@ -1,8 +1,20 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Register email sent{% endblock %}
+
 {% block body %}
-    <p>Thank you for your registration. Please to confirm your account.</p>
-    <p>
-        If you don't receive any email then check the folder with spam or send request again by clicking <a href="{{ url('app_register_email_confirm', {'id': user.id|base64_encode}) }}">this link</a>.
-    </p>
+    <div id="email-sent-container" class="col-12 small-container">
+        <div id="email-sent-body" class="col-12 small-container-body">
+            <p>Thank you for your registration. Please to confirm your account.</p>
+            <p>
+                If you don't receive any email then check the folder with spam or send request again by clicking <a href="{{ url('app_register_email_confirm', {'id': user.id|base64_encode}) }}">this link</a>.
+            </p>
+
+            <div id="other-links" class="d-flex justify-content-center">
+                <a href="{{ path('app_login') }}" target="_blank" class="link-light btn btn-primary">
+                    Return to login page
+                </a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

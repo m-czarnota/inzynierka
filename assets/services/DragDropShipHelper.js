@@ -101,8 +101,8 @@ class DragDropShipHelper {
 
         event.dataTransfer.setDragImage(
             this.servicedShip.fieldsParent,
-            10 + (BoardField.gridSize * (this.selectedShipElement.column - left)),
-            10 + (BoardField.gridSize * (this.selectedShipElement.row - top))
+            BoardField.gridSize / 2 + (BoardField.gridSize * (this.selectedShipElement.column - left)),
+            BoardField.gridSize / 2 + (BoardField.gridSize * (this.selectedShipElement.row - top))
         );
     }
 

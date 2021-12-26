@@ -1,3 +1,6 @@
+$kind-of-game-choice-label-shadow: #999999;
+$kind-of-game-choice-label-background: white;
+
 $board-cell-background: hsl(140, 25%, 68%);
 $board-cell-background-hover: hsl(140, 75%, 68%);
 $board-cell-background-disable: hsl(143, 64%, 15%);
@@ -13,4 +16,11 @@ $ship-element-kill-background: hsl(289, 65%, 43%);
 
 $ship-component-border: gray;
 
-$ships-storage-component-background: brown;
+$ships-storage-background: brown;
+
+$ship-info-element-background: hsl(32, 31%, 52%);
+$ship-info-element-killed-background: red;
+
+$end-of-game-background: #000000ae;
+$end-of-game-content-background: white;
+$end-of-game-info-border: gray;

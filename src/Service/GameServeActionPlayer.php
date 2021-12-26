@@ -31,7 +31,8 @@ class GameServeActionPlayer extends GameServePlayer
         if (!$game) {
             return [
                 'status' => GameResponseStatusEnum::ERROR,
-                'message' => $this->translator->trans('game.gameActions.requests.notInGame'),
+                'header' => $this->translator->trans('game.gameActions.headers.requests.error'),
+                'message' => $this->translator->trans('game.gameActions.messages.requests.notInGame'),
             ];
         }
 
@@ -57,6 +58,7 @@ class GameServeActionPlayer extends GameServePlayer
         $this->changeTurn();
         return [
             'status' => GameResponseStatusEnum::MISSED_TURN,
+            'header' => '',
             'message' => '',
             'yourTurn' => $this->isYourTurn(),
             'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
@@ -70,7 +72,8 @@ class GameServeActionPlayer extends GameServePlayer
     {
         $dataToReturn = [
             'status' => GameResponseStatusEnum::MISS_HIT,
-            'message' => $this->translator->trans('game.gameActions.requests.miss_hit'),
+            'header' => $this->translator->trans('game.gameActions.headers.requests.miss_hit'),
+            'message' => $this->translator->trans('game.gameActions.messages.requests.miss_hit'),
             'yourTurn' => $this->isYourTurn(),
             'userAction' => !array_key_exists('ai_move', $data) ? $this->security->getUser()->getId() : $this->parameterBag->get('ai_id'),
             'coordinates' => $data['coordinates'],
@@ -94,7 +97,8 @@ class GameServeActionPlayer extends GameServePlayer
 
             $lastAction['status'] = $status;
             $dataToReturn['status'] = $status;
-            $dataToReturn['message'] = $this->translator->trans('game.gameActions.requests.' . ($isKilledHitShip ? 'killed' : 'hit'));
+            $dataToReturn['header'] = $this->translator->trans('game.gameActions.headers.requests.' . ($isKilledHitShip ? 'killed' : 'hit'));
+            $dataToReturn['message'] = $this->translator->trans('game.gameActions.messages.requests.' . ($isKilledHitShip ? 'killed' : 'hit'));
 
             if ($isKilledHitShip) {
                 array_push($lastAction['killed'], $hitShipId);
@@ -102,6 +106,7 @@ class GameServeActionPlayer extends GameServePlayer
                 $shipCoordinates = $this->getCoordinatesForShipById($hitShipId, $userMove);
                 $dataToReturn['boardFields'] = $shipCoordinates['boardFields'];
                 $dataToReturn['aroundFields'] = $shipCoordinates['aroundFields'];
+                $dataToReturn['killed'] = $lastAction['killed'];
             }
 
             $this->addShipToHitInLastAction($lastAction, $hitShipId, $userMove);
@@ -125,13 +130,14 @@ class GameServeActionPlayer extends GameServePlayer
 
         $this->saveLastAction($lastAction);
 
-        if ($endGameData = $this->getEndGameData()) {
-            return $endGameData;
-        }
-
         if (in_array($lastAction['status'], [GameResponseStatusEnum::MISS_HIT, GameResponseStatusEnum::HUNTED])) {
             $this->changeTurn();
             $dataToReturn['yourTurn'] = $this->isYourTurn();
+        }
+
+        if ($endGameData = $this->getEndGameData()) {
+            $endGameData['basicData'] = $dataToReturn;
+            return $endGameData;
         }
 
         return $dataToReturn;

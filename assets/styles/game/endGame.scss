@@ -1,0 +1,44 @@
+@import "palette";
+
+.end-game-component {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  background-color: $end-of-game-background;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 10%;
+  z-index: 10;
+}
+
+.end-game-content {
+  background-color: $end-of-game-content-background;
+  padding: 1em;
+  border-radius: 7px;
+  box-shadow: 1px 1px 3px 1px $kind-of-game-choice-label-shadow;
+}
+
+.end-game-info {
+  border-bottom: 1px solid $end-of-game-info-border;
+}
+
+.end-game-button {
+  flex: 0 0 30%;
+  width: 100%;
+
+  .end-game-button-header {
+    font-size: 24px;
+    font-weight: bold;
+  }
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}

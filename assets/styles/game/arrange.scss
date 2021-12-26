@@ -9,15 +9,37 @@
 }
 
 .board-cell {
-  min-height: 20px;
-  min-width: 20px;
-  max-height: 20px;
-  max-width: 20px;
+  //min-height: 30px;
+  //min-width: 30px;
+  //max-height: 30px;
+  //max-width: 30px;
+  padding: 15px;
   margin: 5px;
   background-color: $board-cell-background;
   border-radius: 3px;
   border: 1px solid $board-cell-border;
   cursor: pointer;
+}
+
+.board-letter, .board-digit {
+  min-height: 30px;
+  min-width: 30px;
+  max-height: 30px;
+  max-width: 30px;
+  margin: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.board-digit {
+  align-items: center;
+
+  @media screen and (max-width: 575px) {
+    margin: 6px 0;
+    min-width: 15px;
+    max-width: 15px;
+  }
 }
 
 .board-ship {
@@ -27,10 +49,12 @@
 .ship-component {
   margin: 1em;
   border: 1px solid $ship-component-border;
+  border-radius: 8px;
 }
 
-.ships-storage-component {
-  background-color: $ships-storage-component-background;
+.ships-storage {
+  background-color: $ships-storage-background;
   min-height: 300px;
+  width: 100%;
   padding: 0.5em 0.25em;
 }

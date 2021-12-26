@@ -13,13 +13,21 @@ security:
         class: App\Entity\User
         property: email
     # used to reload user from session & other features (e.g. switch_user)
+
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
     main:
       lazy: true
-      custom_authenticator: App\Security\LoginFormAuthenticator
+#      custom_authenticator: App\Security\LoginFormAuthenticator
+      provider: app_user_provider
+      form_login:
+        username_parameter: email
+        password_parameter: password
+        login_path: app_login
+        check_path: app_login
+        enable_csrf: true
       logout:
         path: app_logout
         # where to redirect after logout

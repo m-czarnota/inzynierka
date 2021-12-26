@@ -1,12 +1,12 @@
 <template>
-    <div class="arrange-component">
-        <main class="arrange-main">
-            <ships-storage-component></ships-storage-component>
-            <board-component></board-component>
+    <div class="arrange-component col-12">
+        <main class="arrange-main col-12 d-flex flex-wrap-reverse">
+            <ships-storage-component class="col-12 col-md-6"></ships-storage-component>
+            <board-component class="col-12 col-md-6"></board-component>
         </main>
         <div class="buttons d-flex justify-content-around mt-5">
-            <button type="button" class="btn btn-secondary back-button" @click="back">Back</button>
-            <button type="button" class="btn btn-warning play-button" @click="play">Play</button>
+            <button type="button" class="btn btn-secondary back-button p-3 fw-bold" @click="back">Back</button>
+            <button type="button" class="btn btn-success play-button p-3 fw-bold" @click="play">Play</button>
         </div>
     </div>
 </template>
@@ -21,6 +21,8 @@ import {shipPlacementService} from "../../services/ShipPlacementService";
 import {dragDropShipHelper} from "../../services/DragDropShipHelper";
 import {gameRouter} from "../../services/GameRouter";
 import {kindsOfGame} from "../../loaders/appGame";
+import {emitter} from "../../services/Emitter";
+import {timeUtil} from "../../utils/TimeUtil";
 
 export default {
     name: "ArrangeComponent",
@@ -45,12 +47,12 @@ export default {
         },
         play() {
             if (shipsStorage.ships.length !== 0) {
-                console.error('You must place all ships on the board!');
+                this.displayError('You must place all ships on the board!');
                 return;
             }
 
             this.countSeconds = setInterval(() => this.whichSecond++, 1000);
-            // document.querySelector('.play-button').setAttribute('disabled', 'true');
+            document.querySelector('.play-button').setAttribute('disabled', 'true');
             this.prepareGameRequest();
         },
         prepareGameRequest() {
@@ -78,7 +80,7 @@ export default {
                     const data = await response.json();
 
                     if (!response.ok) {
-                        console.error(data.message);
+                        this.displayError(data.message);
                         return null;
                     }
 
@@ -94,7 +96,7 @@ export default {
 
                     return data;
                 } catch (error) {
-                    console.error(error);
+                    this.displayError(error);
                 }
 
                 return null;
@@ -112,16 +114,22 @@ export default {
                 board.remove();
             })();
         },
-
         gameNotFound(message) {
             clearInterval(this.countSeconds);
             this.whichSecond = 0;
             this.whichApproach = 0;
 
-            console.error(message);
+            this.displayError(message);
 
             document.querySelector('.play-button').removeAttribute('disabled');
         },
+        displayError(message) {
+            emitter.emit('newBasicToast', {
+                header: 'Error',
+                message: message,
+                time: timeUtil.getCurrentTimeWithoutSeconds(),
+            });
+        }
     },
 }
 </script>
