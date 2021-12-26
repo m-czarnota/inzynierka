@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-    Hello! Homepage
+{% block title %}Tetriso Ships{% endblock %}
 
-    <a class="link-dark btn btn-primary" href="{{ path('app_login') }}">Sign in</a>
+{% block body %}
+    <div id="homepage-container" class="col-12">
+        <div id="homepage-body" class="col-12">
+            <h1>Tetriso Ships welcome!</h1>
+
+            <a class="link-light btn btn-primary col-3" href="{{ path('app_login') }}">Sign in</a>
+        </div>
+    </div>
 {% endblock %}

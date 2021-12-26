@@ -2,7 +2,11 @@
     <div class="board-component d-flex justify-content-center p-3">
         <div class="board"
              ref="boardRef">
+            <div class="board-letters d-flex justify-content-end">
+                <div class="board-letter" v-for="n in size">{{ getLetterFromNumberInLoop(n) }}</div>
+            </div>
             <div v-for="n in size" class="board-row">
+                <div class="board-digit">{{ n }}</div>
                 <field-component v-for="k in size"
                                  :data-coordinates="n + '' + k"
                                  :disable-props="disable"
@@ -13,7 +17,7 @@
                                  @dragover.prevent></field-component>
             </div>
             <div v-if="isArrangeRoute"
-                 class="board-buttons mt-2"
+                 class="board-buttons mt-2 ps-5"
             >
                 <button type="button" class="btn btn-light btn-outline-dark ms-2" @click="clear">Clear</button>
                 <button type="button" class="btn btn-light btn-outline-dark ms-2" @click="drawAgain">Draw again</button>
@@ -94,6 +98,9 @@ export default {
             shipPlacementService.putAllShipsToStorage();
             emitter.emit('storage-rerender', true);
             dragDropShipHelper.setAppropriateColorForAllFields();
+        },
+        getLetterFromNumberInLoop(number) {
+            return String.fromCharCode(number - 1 + 'A'.charCodeAt(0));
         },
     },
     computed: {

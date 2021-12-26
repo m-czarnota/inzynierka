@@ -1,7 +1,15 @@
 {% extends 'base_login.html.twig' %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block body %}
     <div>
         <h1>Hello on Dashboard!</h1>
     </div>
+
+    {% if app.user.game %}
+        <div class="alert alert-warning">
+            <h3>You are just in a game! Click on <a href="{{ path('app_game_arrange') }}/{{ app.user.gameRoom.link }}">this link</a> to quick return.</h3>
+        </div>
+    {% endif %}
 {% endblock %}

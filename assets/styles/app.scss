@@ -5,6 +5,9 @@
 @import "~bootstrap";
 @import "palette";
 @import "layout";
+@import "homepage";
+
+@import "smallContainer";
 
 body {
   background-color: $body-background;

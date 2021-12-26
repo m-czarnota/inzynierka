@@ -3,8 +3,8 @@
 {% block title %}Log in!{% endblock %}
 
 {% block body %}
-<div id="login-container" class="col-12">
-    <form method="post" class="col-12" id="form-login">
+<div id="login-container" class="col-12 small-container">
+    <form method="post" class="col-12 small-container-body" id="form-login">
         {% if error %}
             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
         {% endif %}
@@ -16,7 +16,7 @@
         {% endif %}
 
         {% for message in app.flashes('success') %}
-            <div>{{ message }}</div>
+            <div class="alert alert-success">{{ message }}</div>
         {% endfor %}
 
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>

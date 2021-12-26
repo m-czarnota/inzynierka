@@ -21,12 +21,18 @@ export default {
     },
     methods: {
         createComponent(component, toast) {
+            const newToast = {
+                toast: toast,
+            };
+
+            if ('squareColorClass' in toast) {
+                newToast.squareColorClass = toast.squareColorClass;
+            }
+
             return defineComponent({
                 extends: component,
                 data() {
-                    return {
-                        toast: toast,
-                    };
+                    return newToast;
                 },
             });
         }

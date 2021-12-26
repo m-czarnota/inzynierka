@@ -1,7 +1,7 @@
 <template>
     <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true" ref="toast">
         <div class="toast-header">
-<!--            <img src="" class="rounded me-2" alt="...">-->
+            <span :class="squareColorClass" class="bg-gradient rounded p-2 me-2"></span>
             <strong class="me-auto">{{ header ?? toast.header }}</strong>
             <small class="text-muted">{{ time ?? toast.time}}</small>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" @click="closeToast"></button>
@@ -21,6 +21,7 @@ export default {
         return {
             toast: {},
             liveSeconds: 7,
+            squareColorClass: 'bg-primary',
         };
     },
     mounted() {

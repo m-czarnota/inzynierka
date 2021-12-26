@@ -21,6 +21,27 @@
   cursor: pointer;
 }
 
+.board-letter, .board-digit {
+  min-height: 30px;
+  min-width: 30px;
+  max-height: 30px;
+  max-width: 30px;
+  margin: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.board-digit {
+  align-items: center;
+
+  @media screen and (max-width: 575px) {
+    margin: 6px 0;
+    min-width: 15px;
+    max-width: 15px;
+  }
+}
+
 .board-ship {
   display: grid;
 }

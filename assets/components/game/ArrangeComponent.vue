@@ -52,7 +52,7 @@ export default {
             }
 
             this.countSeconds = setInterval(() => this.whichSecond++, 1000);
-            // document.querySelector('.play-button').setAttribute('disabled', 'true');
+            document.querySelector('.play-button').setAttribute('disabled', 'true');
             this.prepareGameRequest();
         },
         prepareGameRequest() {

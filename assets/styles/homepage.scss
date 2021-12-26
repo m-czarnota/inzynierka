@@ -1,0 +1,23 @@
+@import "palette";
+
+#homepage-container {
+  padding: 1em 1em;
+
+  #homepage-body {
+    background-color: white;
+    padding: 2em;
+    border: 1px solid #E6E6E6FF;
+    border-radius: 5px;
+    box-shadow: 1px 1px 1px 1px #A3A3A3FF;
+    display: flex;
+    flex-direction: column;
+
+    @media screen and (max-width: 575px) {
+      padding: 1em;
+    }
+
+    a {
+      width: 150px;
+    }
+  }
+}

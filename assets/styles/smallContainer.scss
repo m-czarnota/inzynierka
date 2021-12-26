@@ -1,0 +1,25 @@
+@import "palette";
+
+.small-container {
+  padding: 5em 25%;
+
+  @media screen and (max-width: 991px) {
+    padding: 5em 10%;
+  }
+
+  @media screen and (max-width: 575px) {
+    padding: 5em 5%;
+  }
+
+  .small-container-body {
+    background-color: $small-container-body-background;
+    padding: 5em;
+    border: 1px solid $small-container-body-border-color;
+    border-radius: 5px;
+    box-shadow: 1px 1px 1px 1px $small-container-body-box-shadow-color;
+
+    @media screen and (max-width: 575px) {
+      padding: 2em 1em;
+    }
+  }
+}

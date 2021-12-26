@@ -10,16 +10,15 @@ class ServeResponseRequestHelper {
         this.board = board;
         this.data = data;
 
-        emitter.emit('updateInfoBanner', (() => {
+        const updateInfoBannerFunction = (data) => {
             let message = this.isUserOwner() ? 'You: ' : 'Opponent: ';
-            return message + this.data.header;
-        })());
+            return message + data.header;
+        };
+
+        emitter.emit('updateInfoBanner', updateInfoBannerFunction(data));
 
         if (data.status === responseStatuses.end_game) {
-            emitter.emit('updateInfoBanner', (() => {
-                let message = this.isUserOwner() ? 'You: ' : 'Opponent: ';
-                return message + data.basicData.header;
-            })());
+            emitter.emit('updateInfoBanner', updateInfoBannerFunction(data.basicData));
 
             this.serveBasicActions(data.basicData);
             this.serveEndGame();
@@ -46,6 +45,7 @@ class ServeResponseRequestHelper {
                 header: data.header,
                 message: data.message,
                 time: timeUtil.getCurrentTimeWithoutSeconds(),
+                squareColorClass: this.isUserOwner() ? 'bg-danger' : 'bg-primary',
             });
         }
 
